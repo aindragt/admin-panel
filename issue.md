@@ -1,347 +1,113 @@
-# Issue #1 — Setup Project & Konfigurasi Awal
+# Issue #2 — Membuat Master Layout (MVC - View)
 
 **Status:** `Open`
 **Priority:** 🔴 High
-**Labels:** `setup`, `infrastructure`, `foundation`
-**Assignee:** Junior Programmer
+**Labels:** `feature`, `frontend`, `layout`
+**Depends On:** Issue #1 ✅ (Setup Project & Konfigurasi Awal — sudah selesai)
 
 ---
 
 ## 🎯 Title & Objective
 
 ### Judul
-**Setup Fondasi Project Laravel: Struktur, Styling, dan JavaScript Layer**
+**Implementasi Master Layout: Kerangka Visual Utama Admin Panel**
 
-### Mengapa Issue Ini Sangat Krusial?
+### Mengapa Issue Ini Sangat Penting?
 
-Sebelum kita menulis satu baris kode fitur pun, kita perlu memastikan **fondasi project sudah kokoh dan konsisten**. Bayangkan fondasi ini seperti pondasi sebuah gedung — semakin rapi dan kuat sejak awal, semakin mudah dan aman kita membangun lantai-lantai berikutnya.
+Bayangkan membangun sebuah gedung kantor. Sebelum bisa mengisi setiap ruangan dengan furnitur dan peralatan, kamu perlu membangun dulu **kerangka bangunannya** — atap, dinding luar, koridor utama, dan lift. Itulah peran **master layout** dalam sebuah admin panel.
 
-Berikut adalah alasan konkretnya:
+`app.blade.php` adalah **satu-satunya file** yang mendefinisikan struktur visual seluruh aplikasi. Setiap halaman — dashboard, manajemen user, laporan, settings — semuanya akan "mengisi" master layout ini. Inilah kenapa kamu harus mengerjakannya dengan sangat rapi dan teliti:
 
-- **Konsistensi Visual:** Dengan mengkonfigurasi Tailwind CSS, Dark Mode, dan font di sini, seluruh tim akan menggunakan design system yang sama. Tidak ada lagi "tiap halaman beda style-nya."
-- **Reusability & Maintainability:** Dengan mendefinisikan folder structure sejak awal, setiap komponen UI (tombol, input, card, dll.) dibuat sekali dan dipakai di mana saja. Kalau ada perubahan desain, cukup ubah di satu tempat.
-- **Developer Experience (DX) yang Baik:** Alpine.js disetup di sini agar interaksi UI kecil (dropdown, modal, toggle) bisa langsung diimplementasikan tanpa perlu setup tambahan di kemudian hari.
-- **Menghindari Technical Debt:** Struktur yang kacau di awal akan menyebabkan refactoring besar di tengah development, yang membuang waktu dan rentan memperkenalkan bug baru.
+- **Konsistensi Mutlak:** Jika kamu mengubah navbar atau sidebar di satu tempat, perubahan itu otomatis berlaku di seluruh halaman. Tidak perlu menyentuh puluhan file sekaligus.
+- **Foundation untuk Semua Tim:** Setelah layout selesai, developer lain bisa langsung fokus membuat konten halaman tanpa perlu memikirkan lagi soal struktur header atau sidebar.
+- **Kesan Pertama User:** Layout yang responsive dan animasinya mulus adalah hal pertama yang dirasakan user. Ini membentuk persepsi kualitas keseluruhan aplikasi.
+- **Dark Mode adalah Standar Modern:** Implementasi yang benar di level layout memastikan *semua* elemen di seluruh aplikasi otomatis mendukung dark mode tanpa effort tambahan.
 
-> 💡 **Catatan untuk kamu:** Jangan terburu-buru di issue ini. Waktu yang kamu investasikan untuk setup yang rapi di sini akan menghemat waktu berkali-kali lipat di issue-issue berikutnya. Tanyakan jika ada yang belum jelas!
+> 💡 **Catatan untuk kamu:** Issue ini adalah yang paling "terlihat" hasilnya secara visual. Nikmati prosesnya! Kalau ada desain yang kamu rasa bisa lebih bagus dari panduan ini, diskusikan dulu dengan Tech Lead sebelum mengimplementasikan.
 
 ---
 
-## 📁 Folder Structure Guideline
+## 📂 Component & Folder Strategy
 
-Setelah project Laravel berhasil diinisialisasi, kita akan menegakkan **satu aturan paling penting dalam project ini:**
+### Prinsip Utama: "Layout bukan monolith"
 
-> **"Tidak ada UI yang ditulis lebih dari sekali."**
+File `app.blade.php` **tidak boleh** berisi ratusan baris kode HTML sekaligus. Kita akan memecahnya menjadi beberapa **partial file** yang masing-masing punya satu tanggung jawab.
 
-Untuk itu, kita memisahkan semua file tampilan ke dalam beberapa direktori dengan tanggung jawab yang jelas. Berikut adalah struktur `resources/views/` yang harus kamu buat dan patuhi selama development:
+### Struktur yang Harus Dibangun
 
 ```
 resources/
 └── views/
     ├── layouts/
-    │   ├── app.blade.php          # Master layout utama (wrapper HTML penuh)
-    │   └── guest.blade.php        # Layout untuk halaman publik (login, register)
+    │   ├── app.blade.php                 # Kerangka induk (wrapper HTML penuh)
+    │   └── partials/                     # Bagian-bagian kecil dari layout utama
+    │       ├── sidebar.blade.php         # Sidebar navigasi vertikal
+    │       ├── navbar.blade.php          # Header bar atas (dengan dark mode toggle)
+    │       └── footer.blade.php          # Footer aplikasi
     │
-    ├── components/
-    │   ├── ui/
-    │   │   ├── button.blade.php   # Komponen tombol yang reusable
-    │   │   ├── input.blade.php    # Komponen input field
-    │   │   ├── card.blade.php     # Komponen card/panel
-    │   │   ├── badge.blade.php    # Komponen badge/label status
-    │   │   └── alert.blade.php    # Komponen notifikasi/alert
-    │   │
-    │   └── layout/
-    │       ├── sidebar.blade.php  # Komponen sidebar navigasi
-    │       ├── navbar.blade.php   # Komponen top navigation bar
-    │       └── footer.blade.php   # Komponen footer
-    │
-    └── pages/
-        └── dashboard.blade.php    # Contoh halaman (akan diisi di issue berikutnya)
+    └── components/
+        └── ui/                           # (Untuk issue berikutnya — kosongkan dulu)
+            ├── button.blade.php
+            └── ...
 ```
 
-### Aturan Main yang Wajib Diikuti
+### Mengapa Menggunakan `partials/` di Dalam `layouts/`?
 
-| Aturan | Penjelasan |
-|--------|------------|
-| **1 file = 1 tanggung jawab** | `app.blade.php` hanya mengurus wrapper HTML. Konten masuk via `@yield`. |
-| **Gunakan `components/ui/` untuk elemen atom** | Tombol, input, badge adalah elemen terkecil yang berdiri sendiri. |
-| **Gunakan `components/layout/` untuk elemen struktural** | Sidebar dan navbar adalah bagian dari *chrome* aplikasi, bukan konten. |
-| **Halaman diletakkan di `pages/`** | Setiap halaman yang di-render oleh controller masuk ke subfolder `pages/`. |
-| **Jangan hardcode style di dalam halaman** | Pakai komponen. Jika komponen belum ada, buat dulu di folder yang sesuai. |
+Ini adalah pertanyaan yang bagus! Ada dua pendekatan yang sering digunakan:
+
+| Pendekatan | Cara Penggunaan | Cocok Untuk |
+|------------|-----------------|-------------|
+| **`layouts/partials/`** + `@include` | `@include('layouts.partials.sidebar')` | File yang hanya dipakai di dalam layout (sidebar, navbar, footer) |
+| **`components/`** + `<x-tag>` | `<x-sidebar />` | Elemen UI reusable yang dipakai di banyak halaman (button, card, badge) |
+
+Untuk issue ini, kita pakai **pendekatan `partials/`** karena sidebar, navbar, dan footer adalah bagian internal dari layout — mereka tidak akan dipanggil dari halaman konten lain. Ini membuat `components/` tetap bersih hanya untuk elemen UI reusable.
 
 ---
 
 ## ✅ Step-by-Step Tasks
 
-Ikuti checklist ini secara berurutan. Jangan loncat ke step berikutnya sebelum step yang sedang dikerjakan selesai dan berhasil diverifikasi.
+Ikuti checklist ini secara berurutan. Setiap task memiliki **verifikasi mandiri** yang harus kamu lakukan sebelum lanjut ke task berikutnya.
 
 ---
 
-### 📦 Task 1: Inisialisasi Project Laravel
+### 🗂️ Task 1: Siapkan Struktur Folder Baru
 
-- [ ] **1.1** Pastikan environment lokalmu siap. Verifikasi dengan menjalankan perintah berikut di terminal dan pastikan versinya sesuai:
+- [ ] **1.1** Buat direktori `resources/views/layouts/partials/`:
   ```bash
-  php --version    # Minimal PHP 8.2
-  composer --version
-  node --version   # Minimal Node 18.x
-  npm --version
+  mkdir resources/views/layouts/partials
   ```
 
-- [ ] **1.2** Buat project Laravel baru di dalam direktori `admin-panel`. Jalankan perintah berikut **satu level di atas** folder `admin-panel`:
+- [ ] **1.2** Pindahkan (atau buat ulang) file-file yang sudah ada sebagai placeholder dari `resources/views/components/layout/` ke lokasi baru:
   ```bash
-  composer create-project laravel/laravel admin-panel
+  # Jika file sudah ada di components/layout/, kamu bisa copy isinya nanti
+  # Buat file baru di lokasi yang benar:
+  New-Item resources/views/layouts/partials/sidebar.blade.php
+  New-Item resources/views/layouts/partials/navbar.blade.php
+  New-Item resources/views/layouts/partials/footer.blade.php
   ```
-  > ⚠️ Jika folder `admin-panel` sudah ada dan kamu berada di dalamnya, gunakan `.` sebagai target:
-  > ```bash
-  > composer create-project laravel/laravel .
-  > ```
+  > ⚠️ Jangan hapus dulu file lama di `components/layout/`. Kita akan update referensinya di `app.blade.php` pada Task 5 nanti.
 
-- [ ] **1.3** Masuk ke direktori project dan verifikasi instalasi berhasil:
-  ```bash
-  cd admin-panel
-  php artisan --version
-  # Output yang diharapkan: Laravel Framework x.x.x
-  ```
-
-- [ ] **1.4** Salin file environment dan generate application key:
-  ```bash
-  cp .env.example .env
-  php artisan key:generate
-  ```
-
-- [ ] **1.5** Sesuaikan konfigurasi database di file `.env`. Buka file tersebut dan ubah bagian berikut sesuai database lokalmu:
-  ```dotenv
-  APP_NAME="Admin Panel"
-  APP_URL=http://admin-panel.test
-
-  DB_CONNECTION=mysql
-  DB_HOST=127.0.0.1
-  DB_PORT=3306
-  DB_DATABASE=admin_panel_db
-  DB_USERNAME=root
-  DB_PASSWORD=
-  ```
-
-- [ ] **1.6** Buat database `admin_panel_db` di MySQL (via phpMyAdmin, TablePlus, atau terminal), lalu jalankan migration awal:
-  ```bash
-  php artisan migrate
-  ```
-
-- [ ] **1.7** Jalankan development server dan pastikan halaman welcome Laravel muncul di browser:
-  ```bash
-  php artisan serve
-  # Buka http://127.0.0.1:8000 di browser
-  ```
+- [ ] **1.3** Verifikasi struktur folder sudah terbentuk dengan benar sebelum melanjutkan.
 
 ---
 
-### 🎨 Task 2: Instalasi & Konfigurasi Tailwind CSS
+### 🏗️ Task 2: Update Master Layout `app.blade.php`
 
-- [ ] **2.1** Install Tailwind CSS beserta plugin-plugin yang dibutuhkan menggunakan npm:
-  ```bash
-  npm install -D tailwindcss @tailwindcss/forms @tailwindcss/typography
-  ```
-  > 📖 **Mengapa plugin ini?**
-  > - `@tailwindcss/forms`: Mereset style default browser pada elemen form agar mudah di-style ulang.
-  > - `@tailwindcss/typography`: Menyediakan kelas `prose` untuk konten teks yang kaya (artikel, deskripsi panjang).
+File ini sudah ada dari Issue #1 sebagai boilerplate. Sekarang kita sempurnakan strukturnya.
 
-- [ ] **2.2** Inisialisasi konfigurasi Tailwind:
-  ```bash
-  npx tailwindcss init -p
-  ```
-  Perintah ini akan membuat dua file baru: `tailwind.config.js` dan `postcss.config.js`.
+- [ ] **2.1** Buka file `resources/views/layouts/app.blade.php` dan **ganti seluruh isinya** dengan versi final berikut:
 
-- [ ] **2.3** Buka `tailwind.config.js` dan konfigurasikan `content` paths agar Tailwind tahu file mana yang perlu di-scan untuk class detection:
-  ```javascript
-  // tailwind.config.js
-  /** @type {import('tailwindcss').Config} */
-  export default {
-    content: [
-      "./resources/**/*.blade.php",
-      "./resources/**/*.js",
-      "./resources/**/*.vue",
-    ],
-    // ... (akan kita isi di task berikutnya)
-    plugins: [
-      require('@tailwindcss/forms'),
-      require('@tailwindcss/typography'),
-    ],
-  }
-  ```
-
-- [ ] **2.4** Buka file `resources/css/app.css` dan ganti seluruh isinya dengan directive Tailwind berikut:
-  ```css
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-  ```
-
-- [ ] **2.5** Buka `vite.config.js` dan pastikan konfigurasinya sudah benar (biasanya sudah ter-setup oleh Laravel, tapi verifikasi):
-  ```javascript
-  // vite.config.js
-  import { defineConfig } from 'vite';
-  import laravel from 'laravel-vite-plugin';
-
-  export default defineConfig({
-      plugins: [
-          laravel({
-              input: ['resources/css/app.css', 'resources/js/app.js'],
-              refresh: true,
-          }),
-      ],
-  });
-  ```
-
-- [ ] **2.6** Jalankan Vite development server untuk memverifikasi tidak ada error kompilasi:
-  ```bash
-  npm run dev
-  ```
-
----
-
-### 🌙 Task 3: Konfigurasi Dark Mode
-
-- [ ] **3.1** Buka kembali `tailwind.config.js` dan tambahkan konfigurasi `darkMode` dengan strategi `class`. Ini berarti Dark Mode akan aktif ketika elemen `<html>` memiliki class `dark`.
-  ```javascript
-  // tailwind.config.js
-  /** @type {import('tailwindcss').Config} */
-  export default {
-    darkMode: 'class', // 👈 Tambahkan baris ini
-    content: [
-      "./resources/**/*.blade.php",
-      "./resources/**/*.js",
-      "./resources/**/*.vue",
-    ],
-    plugins: [
-      require('@tailwindcss/forms'),
-      require('@tailwindcss/typography'),
-    ],
-  }
-  ```
-  > 💡 **Mengapa strategi `class` dan bukan `media`?**
-  > Strategi `media` mengikuti preferensi sistem operasi user secara otomatis, tetapi kita tidak bisa mengendalikannya via JavaScript.
-  > Strategi `class` memberi kita **kontrol penuh** — user bisa toggle Dark Mode kapan saja melalui tombol di UI, dan pilihannya bisa kita simpan di `localStorage`. Ini adalah standar di hampir semua aplikasi web modern.
-
-- [ ] **3.2** Siapkan logic toggle Dark Mode di `resources/js/app.js`. Tambahkan script berikut untuk membaca preferensi yang tersimpan saat halaman dimuat:
-  ```javascript
-  // resources/js/app.js
-
-  // Dark Mode Initialization
-  // Cek apakah user sebelumnya sudah memilih dark mode, atau ikuti preferensi sistem
-  if (
-    localStorage.getItem('color-theme') === 'dark' ||
-    (!localStorage.getItem('color-theme') &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches)
-  ) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-  ```
-
-- [ ] **3.3** Verifikasi: Buka browser DevTools (F12), lalu pergi ke tab **Console** dan ketik:
-  ```javascript
-  document.documentElement.classList.add('dark')
-  ```
-  Jika kamu sudah menerapkan class `dark:` di beberapa elemen, kamu seharusnya melihat perubahannya secara langsung. Kita akan membuat tombol toggle-nya sebagai bagian dari komponen `navbar` di issue berikutnya.
-
----
-
-### 🖋️ Task 4: Setup Font "Inter" dari Google Fonts
-
-- [ ] **4.1** Buka file master layout `resources/views/layouts/app.blade.php` (yang akan kamu buat di Task 6). Tambahkan tag `<link>` berikut di dalam `<head>` untuk memuat font Inter dari Google Fonts:
-  ```html
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  ```
-  > 💡 Tag `preconnect` pertama-tama membangun koneksi ke server Google Fonts lebih awal, sehingga font dimuat lebih cepat. Ini adalah best practice untuk performa.
-
-- [ ] **4.2** Daftarkan font Inter sebagai font default di `tailwind.config.js`. Kita akan meng-extend `fontFamily` di dalam `theme`:
-  ```javascript
-  // tailwind.config.js
-  import defaultTheme from 'tailwindcss/defaultTheme';
-
-  /** @type {import('tailwindcss').Config} */
-  export default {
-    darkMode: 'class',
-    content: [
-      "./resources/**/*.blade.php",
-      "./resources/**/*.js",
-      "./resources/**/*.vue",
-    ],
-    theme: {
-      extend: {
-        fontFamily: {
-          // Menjadikan Inter sebagai font sans-serif default,
-          // dengan fallback ke font default Tailwind jika Inter gagal dimuat
-          sans: ['Inter', ...defaultTheme.fontFamily.sans],
-        },
-      },
-    },
-    plugins: [
-      require('@tailwindcss/forms'),
-      require('@tailwindcss/typography'),
-    ],
-  }
-  ```
-
-- [ ] **4.3** Verifikasi: Buka halaman di browser, klik kanan pada teks apapun, pilih "Inspect", lalu lihat di panel **Computed Styles**. Pastikan `font-family` sudah menunjukkan `Inter`.
-
----
-
-### ⚡ Task 5: Instalasi & Integrasi Alpine.js
-
-- [ ] **5.1** Install Alpine.js melalui npm (cara yang direkomendasikan untuk project dengan build tool):
-  ```bash
-  npm install alpinejs
-  ```
-
-- [ ] **5.2** Inisialisasi Alpine.js di `resources/js/app.js`. Buka file tersebut dan tambahkan kode berikut setelah kode Dark Mode di Task 3.2:
-  ```javascript
-  // resources/js/app.js
-
-  // --- [Bagian Dark Mode dari Task 3.2 ada di sini] ---
-
-  // Alpine.js Initialization
-  import Alpine from 'alpinejs';
-
-  window.Alpine = Alpine; // Expose ke window agar bisa diakses dari DevTools
-
-  Alpine.start();
-  ```
-
-- [ ] **5.3** Pastikan `resources/js/app.js` ter-import dengan benar di `app.blade.php` menggunakan directive Vite (akan dikerjakan di Task 6):
-  ```html
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
-  ```
-
-- [ ] **5.4** Verifikasi Alpine.js berfungsi dengan membuat test kecil di halaman mana saja. Tambahkan snippet berikut sementara, lalu hapus setelah berhasil:
-  ```html
-  <div x-data="{ count: 0 }">
-    <button @click="count++" class="px-4 py-2 bg-blue-500 text-white rounded">
-      Klik: <span x-text="count"></span>
-    </button>
-  </div>
-  ```
-  Jika tombol merespons klik dan angka bertambah, Alpine.js sudah berhasil diintegrasikan. ✅
-
----
-
-### 🗂️ Task 6: Buat Struktur Folder & File Dasar
-
-- [ ] **6.1** Buat struktur direktori yang sudah didefinisikan di bagian [Folder Structure Guideline](#-folder-structure-guideline) di atas. Kamu bisa menggunakan perintah berikut di terminal (jalankan dari root project):
-  ```bash
-  mkdir -p resources/views/layouts
-  mkdir -p resources/views/components/ui
-  mkdir -p resources/views/components/layout
-  mkdir -p resources/views/pages
-  ```
-
-- [ ] **6.2** Buat file `resources/views/layouts/app.blade.php` sebagai master layout. Berikut adalah boilerplate awalnya:
   ```html
   <!DOCTYPE html>
-  <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="">
+  <html
+      lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      x-data="{ darkMode: localStorage.getItem('color-theme') === 'dark' || (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }"
+      x-init="$watch('darkMode', val => {
+          localStorage.setItem('color-theme', val ? 'dark' : 'light');
+          val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark');
+      })"
+      :class="{ 'dark': darkMode }"
+  >
   <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -351,126 +117,425 @@ Ikuti checklist ini secara berurutan. Jangan loncat ke step berikutnya sebelum s
       {{-- Google Fonts: Inter --}}
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&display=swap" rel="stylesheet">
 
-      {{-- Vite Assets (CSS + JS) --}}
+      {{-- Vite Assets --}}
       @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-      {{-- Stack untuk CSS tambahan per-halaman --}}
+      {{-- Per-page styles --}}
       @stack('styles')
   </head>
-  <body class="bg-gray-100 dark:bg-gray-900 font-sans text-gray-900 dark:text-gray-100 antialiased">
+  <body class="bg-gray-50 dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 antialiased">
 
-      {{-- Sidebar --}}
-      @include('components.layout.sidebar')
+      <div class="flex h-screen overflow-hidden">
 
-      {{-- Main Wrapper --}}
-      <div class="flex flex-col min-h-screen md:pl-64">
+          {{-- Sidebar --}}
+          @include('layouts.partials.sidebar')
 
-          {{-- Navbar --}}
-          @include('components.layout.navbar')
+          {{-- Main Content Area --}}
+          <div class="flex flex-col flex-1 overflow-hidden">
 
-          {{-- Main Content --}}
-          <main class="flex-1 p-6">
-              @yield('content')
-          </main>
+              {{-- Navbar --}}
+              @include('layouts.partials.navbar')
 
-          {{-- Footer --}}
-          @include('components.layout.footer')
+              {{-- Scrollable content --}}
+              <main class="flex-1 overflow-y-auto p-6">
+                  @yield('content')
+              </main>
 
+              {{-- Footer --}}
+              @include('layouts.partials.footer')
+
+          </div>
       </div>
 
-      {{-- Stack untuk JavaScript tambahan per-halaman --}}
+      {{-- Per-page scripts --}}
       @stack('scripts')
   </body>
   </html>
   ```
 
-- [ ] **6.3** Buat file placeholder untuk komponen layout agar tidak terjadi error saat `@include` dipanggil. Isi masing-masing dengan komentar HTML sementara:
+  > 💡 **Perhatikan perubahan penting:**
+  > - Dark mode sekarang di-manage langsung di tag `<html>` menggunakan Alpine.js `x-data` + `x-watch`. Ini adalah cara yang lebih clean dibanding script terpisah di `app.js`.
+  > - Struktur layout berubah menjadi `flex h-screen` untuk aplikasi "full-height" yang lebih modern.
+  > - Path `@include` diubah ke `layouts.partials.*` agar sesuai folder baru.
 
-  **`resources/views/components/layout/sidebar.blade.php`:**
+- [ ] **2.2** Verifikasi: Simpan file dan pastikan tidak ada syntax error yang terlihat di editor kamu.
+
+---
+
+### 📌 Task 3: Membuat Sidebar
+
+Sidebar adalah navigasi vertikal di sisi kiri. Di layar mobile, sidebar harus **bisa disembunyikan** (toggled) menggunakan Alpine.js.
+
+- [ ] **3.1** Buka file `resources/views/layouts/partials/sidebar.blade.php` dan isi dengan kode berikut:
+
   ```html
-  {{-- TODO: Implementasi Sidebar (Issue #2) --}}
+  {{--
+      Sidebar Partial
+      State: dikontrol oleh `sidebarOpen` dari parent Alpine scope (layouts/app.blade.php)
+      Hint untuk Issue berikutnya: tambahkan x-data jika sidebar butuh state lokal sendiri
+  --}}
+
+  {{-- Mobile Overlay --}}
+  <div
+      x-show="sidebarOpen"
+      x-transition:enter="transition-opacity ease-linear duration-300"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition-opacity ease-linear duration-300"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+      @click="sidebarOpen = false"
+      class="fixed inset-0 z-20 bg-black/50 lg:hidden"
+  ></div>
+
+  {{-- Sidebar Panel --}}
+  <aside
+      :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      class="fixed inset-y-0 left-0 z-30 flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
+  >
+      {{-- Logo / Brand --}}
+      <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+          <a href="{{ url('/') }}" class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+              </div>
+              <span class="text-lg font-bold text-gray-900 dark:text-white">AdminPanel</span>
+          </a>
+          {{-- Close button (mobile only) --}}
+          <button @click="sidebarOpen = false" class="lg:hidden text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+          </button>
+      </div>
+
+      {{-- Navigation --}}
+      <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+
+          {{-- Label Section --}}
+          <p class="px-3 mb-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+              Main Menu
+          </p>
+
+          <a href="{{ url('/') }}"
+             class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                    {{ request()->is('/') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+              <span>Dashboard</span>
+          </a>
+
+          {{-- Tambahkan menu lain di sini pada issue berikutnya --}}
+
+      </nav>
+
+      {{-- Sidebar Footer --}}
+      <div class="flex-shrink-0 px-4 py-4 border-t border-gray-200 dark:border-gray-800">
+          <div class="flex items-center gap-3 px-3 py-2">
+              <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                  {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+              </div>
+              <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {{ auth()->user()->name ?? 'Guest' }}
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {{ auth()->user()->email ?? 'guest@example.com' }}
+                  </p>
+              </div>
+          </div>
+      </div>
+  </aside>
   ```
 
-  **`resources/views/components/layout/navbar.blade.php`:**
+  > ⚠️ **Perhatikan:** Sidebar menggunakan state `sidebarOpen` yang perlu didefinisikan di parent `x-data` di `app.blade.php`. Kamu akan update ini di Task 5.
+
+- [ ] **3.2** Verifikasi: Pastikan semua tag SVG dan attribut Alpine sudah tertutup dengan benar.
+
+---
+
+### 🔝 Task 4: Membuat Navbar dengan Dark Mode Toggle
+
+Navbar adalah header bar di bagian atas konten utama. Fungsinya: toggle sidebar (mobile), judul halaman, dan kontrol user (dark mode toggle, notifikasi, profile).
+
+- [ ] **4.1** Buka file `resources/views/layouts/partials/navbar.blade.php` dan isi dengan kode berikut:
+
   ```html
-  {{-- TODO: Implementasi Navbar dengan Dark Mode Toggle (Issue #2) --}}
+  {{-- Navbar Partial --}}
+  <header class="flex-shrink-0 h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+
+      {{-- Left side: Hamburger (mobile) + Page Title --}}
+      <div class="flex items-center gap-4">
+          {{-- Hamburger button — hanya muncul di mobile --}}
+          <button
+              @click="sidebarOpen = !sidebarOpen"
+              class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Toggle Sidebar"
+          >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+          </button>
+
+          {{-- Dynamic Page Title --}}
+          <h1 class="text-lg font-semibold text-gray-800 dark:text-white">
+              @yield('page-title', 'Dashboard')
+          </h1>
+      </div>
+
+      {{-- Right side: Actions --}}
+      <div class="flex items-center gap-2">
+
+          {{-- ☀️🌙 Dark Mode Toggle --}}
+          <button
+              @click="darkMode = !darkMode"
+              class="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              :aria-label="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              title="Toggle Dark Mode"
+          >
+              {{-- Sun icon (tampil saat dark mode aktif) --}}
+              <svg x-show="darkMode" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+              </svg>
+              {{-- Moon icon (tampil saat light mode aktif) --}}
+              <svg x-show="!darkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+              </svg>
+          </button>
+
+          {{-- Notification Bell (placeholder) --}}
+          <button class="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Notifikasi">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              {{-- Badge notifikasi --}}
+              <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
+
+          {{-- User Avatar Dropdown (placeholder) --}}
+          <div x-data="{ open: false }" class="relative">
+              <button @click="open = !open" @click.outside="open = false"
+                  class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                      {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                  </div>
+                  <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+              </button>
+
+              {{-- Dropdown Menu --}}
+              <div
+                  x-show="open"
+                  x-transition:enter="transition ease-out duration-100"
+                  x-transition:enter-start="opacity-0 scale-95"
+                  x-transition:enter-end="opacity-100 scale-100"
+                  x-transition:leave="transition ease-in duration-75"
+                  x-transition:leave-start="opacity-100 scale-100"
+                  x-transition:leave-end="opacity-0 scale-95"
+                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+              >
+                  <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                      <p class="text-sm font-medium text-gray-900 dark:text-white">{{ auth()->user()->name ?? 'Guest' }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ auth()->user()->email ?? 'guest@example.com' }}</p>
+                  </div>
+                  <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                      Profile
+                  </a>
+                  <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                      Settings
+                  </a>
+              </div>
+          </div>
+
+      </div>
+  </header>
   ```
 
-  **`resources/views/components/layout/footer.blade.php`:**
+- [ ] **4.2** Verifikasi: Simpan file dan review ulang — pastikan ikon matahari dan bulan sudah benar posisinya (`x-show="darkMode"` untuk matahari, `x-show="!darkMode"` untuk bulan).
+
+---
+
+### 📄 Task 5: Membuat Footer
+
+Footer sederhana yang menampilkan informasi copyright.
+
+- [ ] **5.1** Buka file `resources/views/layouts/partials/footer.blade.php` dan isi dengan kode berikut:
+
   ```html
-  {{-- TODO: Implementasi Footer (Issue #2) --}}
+  {{-- Footer Partial --}}
+  <footer class="flex-shrink-0 h-12 flex items-center justify-between px-6 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+          &copy; {{ date('Y') }} <span class="font-medium">{{ config('app.name') }}</span>. All rights reserved.
+      </p>
+      <p class="text-xs text-gray-400 dark:text-gray-600">
+          Built with Laravel & Tailwind CSS
+      </p>
+  </footer>
   ```
 
-- [ ] **6.4** Buat halaman dashboard sementara untuk menguji layout:
+---
 
-  **`resources/views/pages/dashboard.blade.php`:**
+### 🔧 Task 6: Update `app.blade.php` — Tambahkan Alpine State untuk Sidebar
+
+Karena sidebar butuh state `sidebarOpen`, kita perlu menambahkannya ke `x-data` di `<html>` tag. Ini memastikan sidebar dan navbar bisa saling "berkomunikasi" lewat Alpine.
+
+- [ ] **6.1** Buka kembali `resources/views/layouts/app.blade.php` dan pastikan tag `<html>` sudah memiliki `sidebarOpen` di dalam `x-data`:
+
+  ```html
+  <html
+      lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      x-data="{
+          darkMode: localStorage.getItem('color-theme') === 'dark' || (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
+          sidebarOpen: window.innerWidth >= 1024
+      }"
+      x-init="$watch('darkMode', val => {
+          localStorage.setItem('color-theme', val ? 'dark' : 'light');
+          val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark');
+      })"
+      :class="{ 'dark': darkMode }"
+  >
+  ```
+  > 💡 `sidebarOpen: window.innerWidth >= 1024` berarti sidebar otomatis terbuka di layar besar (desktop) dan tertutup di layar kecil (mobile). Sangat praktis!
+
+- [ ] **6.2** Verifikasi referensi `@include` di `app.blade.php` sudah mengarah ke `layouts.partials.*`:
+  ```html
+  @include('layouts.partials.sidebar')
+  @include('layouts.partials.navbar')
+  @include('layouts.partials.footer')
+  ```
+
+---
+
+### 🧪 Task 7: Update Halaman Dashboard & Verifikasi Visual
+
+- [ ] **7.1** Buka `resources/views/pages/dashboard.blade.php` dan update isinya untuk memanfaatkan layout baru:
+
   ```html
   @extends('layouts.app')
 
-  @section('title', 'Dashboard')
+  @section('title', 'Dashboard — Admin Panel')
+  @section('page-title', 'Dashboard')
 
   @section('content')
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-              🎉 Setup Berhasil!
-          </h1>
-          <p class="mt-2 text-gray-600 dark:text-gray-400">
-              Project Laravel dengan Tailwind CSS, Dark Mode, Font Inter, dan Alpine.js sudah siap.
+      {{-- Welcome Card --}}
+      <div class="mb-6">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+              Selamat Datang! 👋
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Master layout sudah siap. Saatnya mulai membangun fitur.
           </p>
+      </div>
 
-          {{-- Alpine.js Test --}}
-          <div x-data="{ open: false }" class="mt-6">
-              <button
-                  @click="open = !open"
-                  class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                  Toggle Alpine Test
-              </button>
-              <p x-show="open" x-transition class="mt-3 text-green-600 dark:text-green-400 font-medium">
-                  ✅ Alpine.js bekerja dengan baik!
-              </p>
+      {{-- Stats Grid (placeholder) --}}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          @foreach(['Total Users', 'Active Sessions', 'Revenue', 'Pending Tasks'] as $stat)
+          <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $stat }}</p>
+              <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">—</p>
+          </div>
+          @endforeach
+      </div>
+
+      {{-- Alpine.js Test --}}
+      <div x-data="{ open: false }" class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Alpine.js Verification</h3>
+          <button
+              @click="open = !open"
+              class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+              Toggle Test
+          </button>
+          <div x-show="open" x-transition class="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <p class="text-sm text-green-700 dark:text-green-400 font-medium">✅ Alpine.js bekerja dengan baik!</p>
           </div>
       </div>
   @endsection
   ```
 
-- [ ] **6.5** Daftarkan route untuk halaman dashboard di `routes/web.php`:
-  ```php
-  Route::get('/', function () {
-      return view('pages.dashboard');
-  });
+- [ ] **7.2** Jalankan Vite dan server Laravel secara bersamaan di dua terminal terpisah:
+  ```bash
+  # Terminal 1
+  npm run dev
+
+  # Terminal 2
+  php artisan serve
+  ```
+
+- [ ] **7.3** Buka browser dan akses `http://127.0.0.1:8000`. Lakukan pengujian visual berikut:
+  - [ ] Sidebar muncul di sisi kiri (di layar ≥ 1024px)
+  - [ ] Navbar muncul di bagian atas dengan judul "Dashboard"
+  - [ ] Footer muncul di bagian bawah
+  - [ ] Tombol Dark Mode toggle di navbar berfungsi (ikon berubah, latar berubah)
+  - [ ] Segarkan halaman setelah toggle dark mode — preferensi tersimpan di `localStorage`
+  - [ ] Di layar mobile (gunakan DevTools), hamburger button muncul dan bisa toggle sidebar
+
+---
+
+### 🔀 Task 8: Commit & Push ke Branch Baru
+
+- [ ] **8.1** Buat branch baru dari `main`:
+  ```bash
+  git checkout -b feature/master-layout
+  ```
+
+- [ ] **8.2** Tambahkan semua perubahan ke staging:
+  ```bash
+  git add resources/views/layouts/
+  git add resources/views/pages/dashboard.blade.php
+  ```
+
+- [ ] **8.3** Buat commit dengan pesan yang deskriptif:
+  ```bash
+  git commit -m "feat: implement master layout with sidebar, navbar, dark mode toggle, and footer"
+  ```
+
+- [ ] **8.4** Push ke remote:
+  ```bash
+  git push origin feature/master-layout
   ```
 
 ---
 
 ## 🏁 Acceptance Criteria
 
-Issue ini dinyatakan **Done** dan siap untuk fase development berikutnya jika dan hanya jika **semua** kriteria di bawah ini terpenuhi:
+Issue ini dinyatakan **Done** jika dan hanya jika **semua** kriteria berikut terpenuhi:
 
 | # | Kriteria | Cara Verifikasi |
 |---|----------|-----------------|
-| **AC-1** | ✅ Project Laravel berhasil diinisialisasi | Perintah `php artisan --version` berhasil dijalankan tanpa error |
-| **AC-2** | ✅ Tidak ada error saat menjalankan `npm run dev` | Terminal tidak menampilkan error, Vite HMR server aktif |
-| **AC-3** | ✅ Tailwind CSS berfungsi | Menambahkan class Tailwind (misal `bg-red-500`) pada elemen di browser mengubah tampilannya |
-| **AC-4** | ✅ Dark Mode dapat diaktifkan via `class` | Menjalankan `document.documentElement.classList.toggle('dark')` di browser console mengubah tampilan halaman |
-| **AC-5** | ✅ Font Inter termuat | Browser DevTools → Computed Styles pada elemen teks menampilkan `font-family: Inter, ...` |
-| **AC-6** | ✅ Alpine.js berfungsi | Tombol Alpine.js test di halaman dashboard merespons klik |
-| **AC-7** | ✅ Struktur folder terbentuk | Direktori `resources/views/layouts/`, `resources/views/components/ui/`, dan `resources/views/components/layout/` sudah ada |
-| **AC-8** | ✅ Master layout `app.blade.php` bisa digunakan | Halaman `/` (dashboard) berhasil di-render tanpa error di browser |
-| **AC-9** | ✅ Tidak ada error di `php artisan migrate` | Semua migration default Laravel berhasil dijalankan |
-| **AC-10** | ✅ File `.env` sudah dikonfigurasi | `APP_KEY` sudah tergenerate (nilai `APP_KEY` di `.env` tidak kosong) |
+| **AC-1** | ✅ Layout tidak *broken* di desktop (≥1024px) | Sidebar, navbar, konten, dan footer tertata rapi tanpa overlap |
+| **AC-2** | ✅ Layout responsive di mobile (<1024px) | Sidebar tersembunyi secara default; hamburger button muncul di navbar |
+| **AC-3** | ✅ Sidebar bisa di-toggle di mobile | Klik hamburger → sidebar slide in; klik overlay → sidebar slide out |
+| **AC-4** | ✅ Dark Mode toggle berfungsi | Klik ikon bulan/matahari → seluruh halaman berubah tema |
+| **AC-5** | ✅ Dark Mode tersimpan di `localStorage` | Refresh halaman setelah toggle → tema tetap sesuai pilihan terakhir |
+| **AC-6** | ✅ Judul halaman dinamis | `@yield('page-title')` menampilkan judul yang berbeda per halaman |
+| **AC-7** | ✅ User dropdown berfungsi | Klik avatar → dropdown muncul; klik di luar → dropdown tertutup |
+| **AC-8** | ✅ File tidak monolithic | Sidebar, navbar, footer masing-masing ada di file partial tersendiri di `layouts/partials/` |
+| **AC-9** | ✅ Tidak ada error di browser console | DevTools → Console tab tidak menampilkan error JavaScript |
+| **AC-10** | ✅ `npm run dev` berjalan tanpa error | Terminal Vite tidak menampilkan error kompilasi |
 
 ---
 
 ## 📎 Referensi & Resources
 
-- 📖 [Laravel Documentation](https://laravel.com/docs) — Dokumentasi resmi Laravel
-- 🎨 [Tailwind CSS Documentation](https://tailwindcss.com/docs) — Semua class Tailwind ada di sini
-- 🌙 [Tailwind Dark Mode Guide](https://tailwindcss.com/docs/dark-mode) — Panduan konfigurasi Dark Mode
-- ⚡ [Alpine.js Documentation](https://alpinejs.dev/) — Referensi directive dan magic properties Alpine.js
-- 🖋️ [Google Fonts: Inter](https://fonts.google.com/specimen/Inter) — Halaman font Inter
+- 🏔️ [Alpine.js x-data Documentation](https://alpinejs.dev/directives/data) — Memahami scope dan state management
+- 🔀 [Alpine.js x-transition](https://alpinejs.dev/directives/transition) — Animasi smooth untuk sidebar dan dropdown
+- 🎨 [Tailwind CSS Flexbox](https://tailwindcss.com/docs/flex) — Panduan layouting dengan flexbox
+- 📱 [Tailwind Responsive Design](https://tailwindcss.com/docs/responsive-design) — Breakpoints `sm`, `md`, `lg`, `xl`
+- 🌙 [Tailwind Dark Mode](https://tailwindcss.com/docs/dark-mode) — Penggunaan class `dark:` untuk theming
 
 ---
 
