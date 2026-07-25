@@ -25,3 +25,11 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Bootstrap cache (auto-generated, jangan di-commit)
+/bootstrap/cache/packages.php
+/bootstrap/cache/services.php
+
+# Database lokal (environment-specific, JANGAN di-commit)
+/database/database.sqlite
+/database/*.sqlite
