@@ -1,88 +1,84 @@
-# Issue #3 — Desain Halaman Dashboard
+# Issue #4 — Desain Komponen Form & Input
 
 **Status:** `Open`
 **Priority:** 🔴 High
-**Labels:** `feature`, `frontend`, `dashboard`, `UI`
-**Depends On:** Issue #2 ✅ (Master Layout — sudah selesai)
+**Labels:** `feature`, `frontend`, `components`, `UI`
+**Depends On:** Issue #3 ✅ (Desain Halaman Dashboard — sudah selesai)
 
 ---
 
 ## 🎯 Title & Objective
 
 ### Judul
-**Implementasi Halaman Dashboard: Wajah Utama Admin Panel**
+**Membangun Design System untuk Form Elements: Fondasi UX yang Konsisten**
 
-### Mengapa Issue Ini Penting?
+### Mengapa UI Consistency pada Form Sangat Krusial?
 
-Halaman Dashboard adalah **halaman pertama yang dilihat user setelah login**. Ini adalah "wajah" dari seluruh aplikasi admin panel kita. Kesan pertama sangat menentukan — jika dashboard terasa lambat, berantakan, atau membingungkan, user akan kehilangan kepercayaan pada seluruh sistem.
+Coba bayangkan kamu menggunakan sebuah aplikasi: di halaman A, tombol "Simpan" berwarna biru dengan sudut membulat. Di halaman B, tombol yang sama berwarna hijau dengan sudut tajam. Di halaman C, ada tombol lain yang terlihat sama sekali berbeda. Apa yang kamu rasakan? **Bingung dan tidak profesional.**
 
-Dashboard yang baik punya satu tugas utama: **menyajikan ringkasan data (overview) yang relevan secara visual dan cepat dipahami.** User tidak perlu masuk ke halaman detail hanya untuk tahu kondisi umum sistem.
+Itulah yang dimaksud dengan **UI inconsistency** — dan form elements adalah tempat yang paling sering bermasalah karena tersebar di banyak halaman (login, tambah data, edit profil, filter, dll.).
 
-Berikut yang akan kita bangun dalam issue ini:
+Dengan membangun **form components yang reusable** sejak awal, kita mendapatkan:
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  📊 Dashboard Overview                                   │
-│                                                         │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │ 👥 Users │ │ 📦 Orders│ │ 💰 Revenue│ │ 📈 Growth│  │  ← Stat Cards
-│  │  1,234   │ │   567    │ │ $12,450  │ │  +24.5%  │  │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
-│                                                         │
-│  ┌───────────────────────────┐ ┌─────────────────────┐ │
-│  │  📉 Revenue Overview Chart│ │  🍩 Traffic Source  │ │  ← Charts
-│  │  (Line Chart)             │ │  (Donut Chart)      │ │
-│  └───────────────────────────┘ └─────────────────────┘ │
-│                                                         │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │  📋 Aktivitas Terbaru                            │   │  ← Recent Table
-│  │  ───────────────────────────────────────────    │   │
-│  │  User A | Login   | 2 menit lalu | ● Online    │   │
-│  └─────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
-```
+- **Zero inconsistency:** Input di halaman mana pun selalu terlihat dan terasa sama.
+- **Efisiensi Development:** Junior Programmer cukup memanggil `<x-form.input />` — tidak perlu mengingat class Tailwind yang panjang setiap saat.
+- **Mudah Diupdate:** Ingin mengubah warna focus ring dari biru ke indigo? Cukup ubah di **satu file**, langsung berlaku di seluruh aplikasi.
+- **Aksesibilitas Terjaga:** State `focus`, `error`, dan `disabled` didefinisikan satu kali dengan standar yang benar (ARIA attributes, contrast ratio).
 
-> 💡 **Catatan untuk kamu:** Issue ini banyak menggunakan dummy data (data palsu untuk testing tampilan). Fokus dulu pada **tampilan dan struktur** — data sesungguhnya akan diisi di issue-issue berikutnya saat kita membangun fitur backend.
+> 💡 **Catatan untuk kamu:** Issue ini adalah tentang membangun **Design System** — bukan sekadar bikin "tombol cantik". Setiap keputusan desain yang kamu buat di sini akan menjadi standar seluruh tim. Kalau ragu soal pilihan warna atau ukuran, diskusikan dulu!
 
 ---
 
 ## 📂 Component & Folder Strategy
 
-### Struktur yang Harus Dibangun
+### Prinsip: Pisahkan `form/` dari `ui/`
+
+Kita sudah punya `components/ui/` untuk elemen display seperti `stat-card`. Sekarang kita buat direktori terpisah khusus untuk elemen interaktif form:
 
 ```
 resources/
 └── views/
     ├── pages/
-    │   └── dashboard.blade.php          # Halaman utama dashboard (UPDATE dari placeholder)
+    │   └── forms.blade.php              # [NEW] Halaman demo semua form components
     │
     └── components/
-        └── ui/
-            ├── stat-card.blade.php      # [NEW] Reusable card statistik
-            └── (file lain menyusul di issue berikutnya)
+        ├── ui/
+        │   └── stat-card.blade.php      # (sudah ada dari Issue #3)
+        │
+        └── form/                        # [NEW] Khusus elemen form
+            ├── input.blade.php          # Text input + label + error state
+            ├── textarea.blade.php       # Multi-line text input
+            ├── select.blade.php         # Dropdown select
+            ├── checkbox.blade.php       # Custom styled checkbox
+            ├── radio.blade.php          # Custom styled radio button
+            └── button.blade.php         # Button dengan variasi warna & size
 ```
 
-### Mengapa `stat-card` Harus Jadi Reusable Component?
+### Cara Pemanggilan (Blade Syntax)
 
-Kita membutuhkan **4 stat card** di bagian atas, dan setiap card pada dasarnya punya struktur yang sama: ikon, label, nilai, dan perubahan (naik/turun). Kalau ditulis 4 kali secara manual, kamu akan melanggar prinsip **DRY (Don't Repeat Yourself)**.
-
-Dengan menjadikannya Blade Component, kamu cukup tulis satu kali:
+Karena semua file ada di `components/form/`, mereka dipanggil dengan prefix `x-form.*`:
 
 ```html
-{{-- Dipanggil seperti ini — bersih dan mudah dibaca --}}
-<x-ui.stat-card
-    label="Total Users"
-    value="1,234"
-    change="+12.5%"
-    trend="up"
-    icon="users"
-    color="blue"
-/>
+{{-- Input biasa --}}
+<x-form.input name="email" label="Email Address" type="email" placeholder="you@example.com" />
+
+{{-- Input dengan error state --}}
+<x-form.input name="email" label="Email Address" :error="$errors->first('email')" />
+
+{{-- Button primary --}}
+<x-form.button variant="primary">Simpan Data</x-form.button>
+
+{{-- Button danger --}}
+<x-form.button variant="danger" type="button">Hapus</x-form.button>
 ```
 
-### Cara Registrasi Blade Component
+### Daftarkan Route untuk Halaman Demo
 
-Laravel secara otomatis mendeteksi component di `resources/views/components/`. File `stat-card.blade.php` di dalam subfolder `ui/` akan dipanggil dengan tag `<x-ui.stat-card>` — tidak perlu registrasi manual!
+Halaman demo perlu route agar bisa diakses di browser:
+```php
+// routes/web.php
+Route::get('/forms', fn() => view('pages.forms'))->name('forms.demo');
+```
 
 ---
 
@@ -92,481 +88,680 @@ Ikuti checklist ini secara berurutan.
 
 ---
 
-### 📋 Task 1: Update `dashboard.blade.php` — Struktur Dasar Halaman
+### 🗂️ Task 1: Siapkan Folder & Halaman Demo
 
-File ini sudah ada sebagai placeholder dari Issue #1. Sekarang kita beri "nyawa" sesungguhnya.
+- [ ] **1.1** Buat direktori `resources/views/components/form/`:
+  ```bash
+  mkdir resources/views/components/form
+  ```
 
-- [ ] **1.1** Buka `resources/views/pages/dashboard.blade.php` dan **ganti seluruh isinya** dengan struktur halaman yang sudah menggunakan section dengan benar:
+- [ ] **1.2** Buat file halaman demo `resources/views/pages/forms.blade.php` dengan struktur awal:
 
   ```html
   @extends('layouts.app')
 
-  @section('title', 'Dashboard — ' . config('app.name'))
-  @section('page-title', 'Dashboard')
-
-  @push('styles')
-      {{-- Style tambahan khusus halaman dashboard jika diperlukan --}}
-  @endpush
+  @section('title', 'Form Components Demo')
+  @section('page-title', 'Form Components')
 
   @section('content')
+      <div class="max-w-4xl space-y-8">
 
-      {{-- ============================= --}}
-      {{-- SECTION 1: Stats Overview    --}}
-      {{-- ============================= --}}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-          {{-- Stat cards akan diisi di Task 3 --}}
+          {{-- Section akan ditambahkan per task --}}
+
+          <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-1">📋 Halaman Demo</h2>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Halaman ini menampilkan semua form components yang tersedia. Isi saat task dikerjakan.
+              </p>
+          </div>
+
       </div>
-
-      {{-- ============================= --}}
-      {{-- SECTION 2: Charts Row        --}}
-      {{-- ============================= --}}
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-          {{-- Charts akan diisi di Task 4 --}}
-      </div>
-
-      {{-- ============================= --}}
-      {{-- SECTION 3: Recent Activity   --}}
-      {{-- ============================= --}}
-      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
-          {{-- Tabel akan diisi di Task 5 --}}
-      </div>
-
   @endsection
-
-  @push('scripts')
-      {{-- Script chart akan diisi di Task 4 --}}
-  @endpush
   ```
 
-- [ ] **1.2** Pastikan halaman bisa di-akses tanpa error di browser (`http://127.0.0.1:8000`) — halamannya boleh kosong dulu, yang penting tidak ada error.
+- [ ] **1.3** Tambahkan route di `routes/web.php`:
+  ```php
+  Route::get('/forms', fn() => view('pages.forms'))->name('forms.demo');
+  ```
+
+- [ ] **1.4** Verifikasi: Buka `http://127.0.0.1:8000/forms` — halaman kosong tapi tidak ada error.
 
 ---
 
-### 🃏 Task 2: Buat Reusable Component `stat-card.blade.php`
+### 📝 Task 2: Komponen `input.blade.php` — Text Input dengan 3 States
 
-- [ ] **2.1** Buat file baru di `resources/views/components/ui/stat-card.blade.php`:
+Ini adalah komponen yang paling sering digunakan. Harus mendukung state: **normal**, **focus**, dan **error**.
+
+- [ ] **2.1** Buat file `resources/views/components/form/input.blade.php`:
 
   ```html
   {{--
-      Reusable Stat Card Component
+      Text Input Component
       Props:
-        - $label   : string  — Nama metrik (contoh: "Total Users")
-        - $value   : string  — Nilai utama (contoh: "1,234")
-        - $change  : string  — Perubahan dalam persen (contoh: "+12.5%")
-        - $trend   : string  — "up" atau "down" (menentukan warna dan ikon arah)
-        - $icon    : string  — Nama ikon: "users" | "shopping-bag" | "currency-dollar" | "trending-up"
-        - $color   : string  — "blue" | "green" | "yellow" | "purple"
+        - $name        : string  — Atribut name & id pada input (wajib)
+        - $label       : string  — Label teks di atas input
+        - $type        : string  — "text" | "email" | "password" | "number" | "tel" (default: "text")
+        - $placeholder : string  — Placeholder text
+        - $value       : mixed   — Nilai awal input (opsional)
+        - $error       : string  — Pesan error (jika ada, input berubah ke state merah)
+        - $hint        : string  — Teks bantuan kecil di bawah input
+        - $required    : bool    — Tampilkan tanda * merah di label
+        - $disabled    : bool    — State disabled
   --}}
 
   @props([
-      'label'  => 'Metric',
-      'value'  => '0',
-      'change' => '0%',
-      'trend'  => 'up',
-      'icon'   => 'users',
-      'color'  => 'blue',
+      'name'        => '',
+      'label'       => '',
+      'type'        => 'text',
+      'placeholder' => '',
+      'value'       => null,
+      'error'       => null,
+      'hint'        => null,
+      'required'    => false,
+      'disabled'    => false,
+  ])
+
+  <div class="w-full">
+
+      {{-- Label --}}
+      @if($label)
+      <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          {{ $label }}
+          @if($required)
+              <span class="text-red-500 ml-0.5">*</span>
+          @endif
+      </label>
+      @endif
+
+      {{-- Input Field --}}
+      <input
+          type="{{ $type }}"
+          id="{{ $name }}"
+          name="{{ $name }}"
+          value="{{ old($name, $value) }}"
+          placeholder="{{ $placeholder }}"
+          {{ $required ? 'required' : '' }}
+          {{ $disabled ? 'disabled' : '' }}
+          {{ $attributes->merge([
+              'class' => '
+                  w-full px-3.5 py-2.5 rounded-lg text-sm
+                  bg-white dark:bg-gray-800
+                  border transition-colors duration-150
+                  text-gray-900 dark:text-white
+                  placeholder-gray-400 dark:placeholder-gray-500
+                  focus:outline-none focus:ring-2 focus:ring-offset-0
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-900
+                  ' . ($error
+                      ? 'border-red-400 dark:border-red-500 focus:border-red-400 focus:ring-red-300 dark:focus:ring-red-500/30'
+                      : 'border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-300 dark:focus:ring-indigo-500/30'
+                  )
+          ]) }}
+      />
+
+      {{-- Hint Text --}}
+      @if($hint && !$error)
+      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ $hint }}</p>
+      @endif
+
+      {{-- Error Message --}}
+      @if($error)
+      <p class="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          {{ $error }}
+      </p>
+      @endif
+
+  </div>
+  ```
+
+- [ ] **2.2** Tambahkan demo di `forms.blade.php` untuk menampilkan semua state:
+
+  ```html
+  {{-- Demo: Text Input --}}
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+      <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Text Input</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {{-- Normal state --}}
+          <x-form.input
+              name="normal_input"
+              label="Normal State"
+              placeholder="Ketik sesuatu..."
+              hint="Ini adalah hint text untuk user."
+          />
+          {{-- Focus state (otomatis saat diklik) --}}
+          <x-form.input
+              name="focus_input"
+              label="Focus State (klik input)"
+              placeholder="Klik untuk lihat focus ring..."
+          />
+          {{-- Error state --}}
+          <x-form.input
+              name="error_input"
+              label="Error State"
+              placeholder="Ada yang salah..."
+              error="Email tidak valid. Gunakan format yang benar."
+          />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {{-- Required --}}
+          <x-form.input
+              name="required_input"
+              label="Required Field"
+              placeholder="Wajib diisi"
+              :required="true"
+          />
+          {{-- Disabled --}}
+          <x-form.input
+              name="disabled_input"
+              label="Disabled State"
+              value="Tidak bisa diubah"
+              :disabled="true"
+          />
+          {{-- Password --}}
+          <x-form.input
+              name="password_input"
+              type="password"
+              label="Password Field"
+              placeholder="••••••••"
+          />
+      </div>
+  </div>
+  ```
+
+- [ ] **2.3** Verifikasi di browser: 3 state (normal, focus saat diklik, error) tampil dengan benar dalam dark dan light mode.
+
+---
+
+### 📝 Task 3: Komponen `textarea.blade.php`
+
+- [ ] **3.1** Buat file `resources/views/components/form/textarea.blade.php`:
+
+  ```html
+  @props([
+      'name'        => '',
+      'label'       => '',
+      'placeholder' => '',
+      'value'       => null,
+      'error'       => null,
+      'hint'        => null,
+      'required'    => false,
+      'disabled'    => false,
+      'rows'        => 4,
+  ])
+
+  <div class="w-full">
+      @if($label)
+      <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          {{ $label }}
+          @if($required) <span class="text-red-500 ml-0.5">*</span> @endif
+      </label>
+      @endif
+
+      <textarea
+          id="{{ $name }}"
+          name="{{ $name }}"
+          rows="{{ $rows }}"
+          placeholder="{{ $placeholder }}"
+          {{ $required ? 'required' : '' }}
+          {{ $disabled ? 'disabled' : '' }}
+          {{ $attributes->merge([
+              'class' => '
+                  w-full px-3.5 py-2.5 rounded-lg text-sm resize-y
+                  bg-white dark:bg-gray-800
+                  border transition-colors duration-150
+                  text-gray-900 dark:text-white
+                  placeholder-gray-400 dark:placeholder-gray-500
+                  focus:outline-none focus:ring-2 focus:ring-offset-0
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  ' . ($error
+                      ? 'border-red-400 dark:border-red-500 focus:border-red-400 focus:ring-red-300'
+                      : 'border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-300 dark:focus:ring-indigo-500/30'
+                  )
+          ]) }}
+      >{{ old($name, $value) }}</textarea>
+
+      @if($hint && !$error)
+      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ $hint }}</p>
+      @endif
+
+      @if($error)
+      <p class="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          {{ $error }}
+      </p>
+      @endif
+  </div>
+  ```
+
+- [ ] **3.2** Tambahkan demo di `forms.blade.php`:
+  ```html
+  <x-form.textarea name="bio" label="Bio / Deskripsi" placeholder="Tulis sesuatu..." hint="Maks. 500 karakter." />
+  ```
+
+---
+
+### 🔽 Task 4: Komponen `select.blade.php` — Dropdown Modern
+
+- [ ] **4.1** Buat file `resources/views/components/form/select.blade.php`:
+
+  ```html
+  @props([
+      'name'     => '',
+      'label'    => '',
+      'options'  => [],
+      'selected' => null,
+      'error'    => null,
+      'hint'     => null,
+      'required' => false,
+      'disabled' => false,
+      'placeholder' => 'Pilih salah satu...',
+  ])
+
+  <div class="w-full">
+      @if($label)
+      <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          {{ $label }}
+          @if($required) <span class="text-red-500 ml-0.5">*</span> @endif
+      </label>
+      @endif
+
+      <div class="relative">
+          <select
+              id="{{ $name }}"
+              name="{{ $name }}"
+              {{ $required ? 'required' : '' }}
+              {{ $disabled ? 'disabled' : '' }}
+              {{ $attributes->merge([
+                  'class' => '
+                      w-full px-3.5 py-2.5 pr-10 rounded-lg text-sm appearance-none
+                      bg-white dark:bg-gray-800
+                      border transition-colors duration-150
+                      text-gray-900 dark:text-white
+                      focus:outline-none focus:ring-2 focus:ring-offset-0
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      ' . ($error
+                          ? 'border-red-400 focus:border-red-400 focus:ring-red-300'
+                          : 'border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-300 dark:focus:ring-indigo-500/30'
+                      )
+              ]) }}
+          >
+              <option value="" disabled {{ !$selected ? 'selected' : '' }}>
+                  {{ $placeholder }}
+              </option>
+              @foreach($options as $value => $label)
+              <option value="{{ $value }}" {{ old($name, $selected) == $value ? 'selected' : '' }}>
+                  {{ $label }}
+              </option>
+              @endforeach
+          </select>
+
+          {{-- Custom chevron icon --}}
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+          </div>
+      </div>
+
+      @if($hint && !$error)
+      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ $hint }}</p>
+      @endif
+
+      @if($error)
+      <p class="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          {{ $error }}
+      </p>
+      @endif
+  </div>
+  ```
+
+- [ ] **4.2** Tambahkan demo di `forms.blade.php`:
+  ```html
+  <x-form.select
+      name="role"
+      label="Role Pengguna"
+      :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer (Read Only)']"
+      hint="Pilih peran yang sesuai."
+  />
+  ```
+
+- [ ] **4.3** Verifikasi: Ikon chevron custom muncul (bukan chevron default browser) dan select dapat mengambil nilai yang dipilih.
+
+---
+
+### ☑️ Task 5: Komponen `checkbox.blade.php` — Custom Styled
+
+Plugin `@tailwindcss/forms` sudah kita install di Issue #1 — plugin ini mereset style default browser pada checkbox agar mudah di-custom dengan Tailwind.
+
+- [ ] **5.1** Buat file `resources/views/components/form/checkbox.blade.php`:
+
+  ```html
+  @props([
+      'name'     => '',
+      'label'    => '',
+      'value'    => '1',
+      'checked'  => false,
+      'disabled' => false,
+      'hint'     => null,
+  ])
+
+  <div class="flex items-start gap-3">
+      <div class="flex items-center h-5 mt-0.5">
+          <input
+              type="checkbox"
+              id="{{ $name }}"
+              name="{{ $name }}"
+              value="{{ $value }}"
+              {{ old($name, $checked) ? 'checked' : '' }}
+              {{ $disabled ? 'disabled' : '' }}
+              class="
+                  w-4 h-4 rounded
+                  text-indigo-600 dark:text-indigo-500
+                  bg-white dark:bg-gray-800
+                  border-gray-300 dark:border-gray-600
+                  focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:ring-2 focus:ring-offset-1
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-colors duration-150
+                  cursor-pointer
+              "
+          />
+      </div>
+      <div>
+          @if($label)
+          <label for="{{ $name }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer {{ $disabled ? 'opacity-50' : '' }}">
+              {{ $label }}
+          </label>
+          @endif
+          @if($hint)
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $hint }}</p>
+          @endif
+      </div>
+  </div>
+  ```
+
+- [ ] **5.2** Buat file `resources/views/components/form/radio.blade.php`:
+
+  ```html
+  @props([
+      'name'     => '',
+      'label'    => '',
+      'value'    => '',
+      'checked'  => false,
+      'disabled' => false,
+      'hint'     => null,
+  ])
+
+  <div class="flex items-start gap-3">
+      <div class="flex items-center h-5 mt-0.5">
+          <input
+              type="radio"
+              id="{{ $name }}_{{ $value }}"
+              name="{{ $name }}"
+              value="{{ $value }}"
+              {{ old($name) == $value || $checked ? 'checked' : '' }}
+              {{ $disabled ? 'disabled' : '' }}
+              class="
+                  w-4 h-4
+                  text-indigo-600 dark:text-indigo-500
+                  bg-white dark:bg-gray-800
+                  border-gray-300 dark:border-gray-600
+                  focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:ring-2 focus:ring-offset-1
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  cursor-pointer
+              "
+          />
+      </div>
+      <div>
+          @if($label)
+          <label for="{{ $name }}_{{ $value }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer {{ $disabled ? 'opacity-50' : '' }}">
+              {{ $label }}
+          </label>
+          @endif
+          @if($hint)
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $hint }}</p>
+          @endif
+      </div>
+  </div>
+  ```
+
+- [ ] **5.3** Tambahkan demo di `forms.blade.php`:
+
+  ```html
+  {{-- Checkbox Demo --}}
+  <div class="space-y-3">
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Checkbox</h3>
+      <x-form.checkbox name="terms" label="Saya setuju dengan syarat & ketentuan yang berlaku." hint="Wajib disetujui sebelum melanjutkan." :checked="true" />
+      <x-form.checkbox name="newsletter" label="Kirimkan saya newsletter mingguan." />
+      <x-form.checkbox name="disabled_check" label="Checkbox (disabled)" :disabled="true" :checked="true" />
+  </div>
+
+  {{-- Radio Demo --}}
+  <div class="space-y-3">
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Radio Button</h3>
+      <x-form.radio name="gender" value="male"   label="Laki-laki" :checked="true" />
+      <x-form.radio name="gender" value="female" label="Perempuan" />
+      <x-form.radio name="gender" value="other"  label="Tidak ingin menyebutkan" />
+  </div>
+  ```
+
+---
+
+### 🔘 Task 6: Komponen `button.blade.php` — Multi-Variant
+
+- [ ] **6.1** Buat file `resources/views/components/form/button.blade.php`:
+
+  ```html
+  {{--
+      Button Component
+      Props:
+        - $variant : "primary" | "secondary" | "danger" | "ghost" | "success" (default: "primary")
+        - $size    : "sm" | "md" | "lg" (default: "md")
+        - $type    : "button" | "submit" | "reset" (default: "button")
+        - $disabled: bool
+        - $loading : bool — Tampilkan spinner dan disable button
+  --}}
+
+  @props([
+      'variant'  => 'primary',
+      'size'     => 'md',
+      'type'     => 'button',
+      'disabled' => false,
+      'loading'  => false,
   ])
 
   @php
-      $colors = [
-          'blue'   => 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-          'green'  => 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
-          'yellow' => 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
-          'purple' => 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-      ];
+  $variants = [
+      'primary'   => 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white shadow-sm focus:ring-indigo-400',
+      'secondary' => 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 shadow-sm focus:ring-gray-300',
+      'danger'    => 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-sm focus:ring-red-400',
+      'success'   => 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-sm focus:ring-emerald-400',
+      'ghost'     => 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 focus:ring-gray-300',
+  ];
 
-      $icons = [
-          'users'            => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v2h5M7 20v-2a3 3 0 015.356-1.857M7 20v2m5-10a3 3 0 100-6 3 3 0 000 6zm6 0a3 3 0 100-6 3 3 0 000 6z',
-          'shopping-bag'     => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
-          'currency-dollar'  => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-          'trending-up'      => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
-      ];
+  $sizes = [
+      'sm' => 'px-3 py-1.5 text-xs rounded-lg',
+      'md' => 'px-4 py-2.5 text-sm rounded-lg',
+      'lg' => 'px-6 py-3 text-base rounded-xl',
+  ];
 
-      $colorClass = $colors[$color] ?? $colors['blue'];
-      $iconPath   = $icons[$icon] ?? $icons['users'];
-      $trendUp    = $trend === 'up';
+  $variantClass = $variants[$variant] ?? $variants['primary'];
+  $sizeClass    = $sizes[$size] ?? $sizes['md'];
+  $isDisabled   = $disabled || $loading;
   @endphp
 
-  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
+  <button
+      type="{{ $type }}"
+      {{ $isDisabled ? 'disabled' : '' }}
+      {{ $attributes->merge([
+          'class' => "
+              inline-flex items-center justify-center gap-2 font-medium
+              transition-all duration-150
+              focus:outline-none focus:ring-2 focus:ring-offset-2
+              disabled:opacity-50 disabled:cursor-not-allowed
+              {$variantClass} {$sizeClass}
+          "
+      ]) }}
+  >
+      {{-- Loading Spinner --}}
+      @if($loading)
+      <svg class="animate-spin w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+      </svg>
+      @endif
 
-      {{-- Icon Badge --}}
-      <div class="flex-shrink-0 w-12 h-12 rounded-xl {{ $colorClass }} flex items-center justify-center">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
-              <path stroke-linecap="round" stroke-linejoin="round" d="{{ $iconPath }}"/>
-          </svg>
+      {{-- Slot: konten tombol (teks / ikon) --}}
+      {{ $slot }}
+  </button>
+  ```
+
+- [ ] **6.2** Tambahkan demo di `forms.blade.php`:
+
+  ```html
+  {{-- Demo: Button Variants --}}
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+      <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Button Variants</h2>
+
+      {{-- By Variant --}}
+      <div class="flex flex-wrap gap-3 mb-4">
+          <x-form.button variant="primary">Primary</x-form.button>
+          <x-form.button variant="secondary">Secondary</x-form.button>
+          <x-form.button variant="danger">Danger</x-form.button>
+          <x-form.button variant="success">Success</x-form.button>
+          <x-form.button variant="ghost">Ghost</x-form.button>
       </div>
 
-      {{-- Content --}}
-      <div class="flex-1 min-w-0">
-          <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">
-              {{ $label }}
-          </p>
-          <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-              {{ $value }}
-          </p>
-          <div class="mt-1 flex items-center gap-1">
-              <svg class="w-3.5 h-3.5 {{ $trendUp ? 'text-green-500' : 'text-red-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  @if($trendUp)
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
-                  @else
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-                  @endif
+      {{-- By Size --}}
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+          <x-form.button size="sm">Small</x-form.button>
+          <x-form.button size="md">Medium</x-form.button>
+          <x-form.button size="lg">Large</x-form.button>
+      </div>
+
+      {{-- States --}}
+      <div class="flex flex-wrap items-center gap-3">
+          <x-form.button :disabled="true">Disabled</x-form.button>
+          <x-form.button :loading="true">Loading...</x-form.button>
+          <x-form.button type="submit" variant="primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              <span class="text-xs font-medium {{ $trendUp ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                  {{ $change }}
-              </span>
-              <span class="text-xs text-gray-400 dark:text-gray-500">vs bulan lalu</span>
-          </div>
+              Simpan Perubahan
+          </x-form.button>
       </div>
   </div>
   ```
 
-- [ ] **2.2** Verifikasi: Tidak ada syntax error PHP atau tag yang tidak tertutup.
+- [ ] **6.3** Verifikasi semua variant dan size tampil dengan benar. Test state `loading` — spinner harus berputar.
 
 ---
 
-### 📊 Task 3: Integrasikan Stat Cards ke Dashboard
+### 🧩 Task 7: Rakit Semua Komponen dalam Form Demo Lengkap
 
-Sekarang kita gunakan component yang baru dibuat.
+Setelah semua komponen selesai, buat satu section demo "form nyata" untuk membuktikan semua komponen bisa bekerja bersama.
 
-- [ ] **3.1** Buka kembali `dashboard.blade.php` dan isi bagian **SECTION 1** dengan 4 stat card menggunakan dummy data:
+- [ ] **7.1** Tambahkan section "Contoh Form Nyata" di bagian bawah `forms.blade.php`:
 
   ```html
-  {{-- SECTION 1: Stats Overview --}}
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+  {{-- Demo: Contoh Form Nyata --}}
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
 
-      <x-ui.stat-card
-          label="Total Users"
-          value="1,284"
-          change="+12.5%"
-          trend="up"
-          icon="users"
-          color="blue"
-      />
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Contoh Form: Tambah User Baru</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Semua form components digunakan bersama.</p>
+      </div>
 
-      <x-ui.stat-card
-          label="Total Orders"
-          value="843"
-          change="+8.2%"
-          trend="up"
-          icon="shopping-bag"
-          color="green"
-      />
+      <form action="#" method="POST" class="p-6 space-y-5">
+          @csrf
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <x-form.input name="first_name" label="Nama Depan" placeholder="Budi" :required="true" />
+              <x-form.input name="last_name"  label="Nama Belakang" placeholder="Santoso" />
+          </div>
 
-      <x-ui.stat-card
-          label="Revenue"
-          value="$24,780"
-          change="-3.1%"
-          trend="down"
-          icon="currency-dollar"
-          color="yellow"
-      />
+          <x-form.input
+              name="email"
+              type="email"
+              label="Alamat Email"
+              placeholder="budi@example.com"
+              :required="true"
+              hint="Email akan digunakan untuk login."
+          />
 
-      <x-ui.stat-card
-          label="Growth Rate"
-          value="24.5%"
-          change="+4.6%"
-          trend="up"
-          icon="trending-up"
-          color="purple"
-      />
+          <x-form.input
+              name="password"
+              type="password"
+              label="Password"
+              placeholder="Minimal 8 karakter"
+              :required="true"
+              error="Password minimal 8 karakter dan harus mengandung angka."
+          />
 
+          <x-form.select
+              name="role"
+              label="Role"
+              :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
+              :required="true"
+          />
+
+          <x-form.textarea
+              name="bio"
+              label="Bio (Opsional)"
+              placeholder="Ceritakan sedikit tentang user ini..."
+              :rows="3"
+          />
+
+          <div class="space-y-2">
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Notifikasi</p>
+              <x-form.checkbox name="notif_email"  label="Kirim notifikasi via Email" :checked="true" />
+              <x-form.checkbox name="notif_system" label="Tampilkan notifikasi di sistem" :checked="true" />
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <x-form.button type="button" variant="secondary">Batal</x-form.button>
+              <x-form.button type="submit" variant="primary">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                  Tambah User
+              </x-form.button>
+          </div>
+      </form>
   </div>
   ```
 
-- [ ] **3.2** Buka browser dan verifikasi 4 card muncul dalam grid yang rapi. Coba resize browser untuk memastikan grid responsive bekerja:
-  - Mobile (< 640px): 1 kolom
-  - Tablet (≥ 640px): 2 kolom
-  - Desktop (≥ 1024px): 4 kolom
+- [ ] **7.2** Verifikasi form terlihat kohesif dan semua komponen bekerja bersama tanpa ada yang aneh tampilannya.
 
 ---
 
-### 📈 Task 4: Integrasi ApexCharts — Line Chart & Donut Chart
+### 🔀 Task 8: Commit & Push ke Branch Baru
 
-Kita akan menggunakan **ApexCharts** via CDN karena:
-- Dokumentasi lengkap dan mudah dipahami
-- Animasi bawaan yang indah
-- Mendukung dark mode dengan mudah via opsi `theme`
-- Tidak perlu build step tambahan
-
-- [ ] **4.1** Tambahkan script ApexCharts via CDN di `@push('scripts')` di bawah halaman dashboard:
-
-  ```html
-  @push('scripts')
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  <script>
-  document.addEventListener('DOMContentLoaded', function () {
-
-      // ─── Deteksi Dark Mode ──────────────────────────────────────────
-      const isDark = () => document.documentElement.classList.contains('dark');
-
-      // ─── LINE CHART: Revenue Overview ──────────────────────────────
-      const lineOptions = {
-          chart: {
-              type: 'area',
-              height: 280,
-              toolbar: { show: false },
-              background: 'transparent',
-              fontFamily: 'Inter, sans-serif',
-          },
-          theme: { mode: isDark() ? 'dark' : 'light' },
-          colors: ['#6366f1', '#10b981'],
-          series: [
-              {
-                  name: 'Revenue',
-                  data: [31000, 40000, 28000, 51000, 42000, 60000, 55000, 72000, 65000, 80000, 75000, 91000],
-              },
-              {
-                  name: 'Expenses',
-                  data: [11000, 32000, 45000, 32000, 34000, 52000, 41000, 49000, 38000, 55000, 48000, 60000],
-              },
-          ],
-          xaxis: {
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-              labels: { style: { fontFamily: 'Inter, sans-serif', fontSize: '12px' } },
-          },
-          yaxis: {
-              labels: {
-                  formatter: (val) => '$' + (val / 1000).toFixed(0) + 'k',
-                  style: { fontFamily: 'Inter, sans-serif', fontSize: '12px' },
-              },
-          },
-          fill: {
-              type: 'gradient',
-              gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05 },
-          },
-          stroke: { curve: 'smooth', width: 2.5 },
-          legend: { position: 'top', horizontalAlign: 'right', fontFamily: 'Inter, sans-serif' },
-          grid: { borderColor: isDark() ? '#374151' : '#e5e7eb' },
-          dataLabels: { enabled: false },
-          tooltip: { theme: isDark() ? 'dark' : 'light', x: { format: 'MMM' } },
-      };
-
-      const lineChart = new ApexCharts(document.querySelector('#chart-revenue'), lineOptions);
-      lineChart.render();
-
-      // ─── DONUT CHART: Traffic Source ───────────────────────────────
-      const donutOptions = {
-          chart: {
-              type: 'donut',
-              height: 280,
-              background: 'transparent',
-              fontFamily: 'Inter, sans-serif',
-          },
-          theme: { mode: isDark() ? 'dark' : 'light' },
-          colors: ['#6366f1', '#10b981', '#f59e0b', '#ef4444'],
-          series: [44, 27, 18, 11],
-          labels: ['Organic', 'Direct', 'Social', 'Referral'],
-          legend: {
-              position: 'bottom',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '13px',
-          },
-          plotOptions: {
-              pie: {
-                  donut: {
-                      size: '70%',
-                      labels: {
-                          show: true,
-                          total: {
-                              show: true,
-                              label: 'Total',
-                              fontFamily: 'Inter, sans-serif',
-                              fontSize: '14px',
-                              formatter: () => '100%',
-                          },
-                      },
-                  },
-              },
-          },
-          dataLabels: { enabled: false },
-          tooltip: { theme: isDark() ? 'dark' : 'light' },
-      };
-
-      const donutChart = new ApexCharts(document.querySelector('#chart-traffic'), donutOptions);
-      donutChart.render();
-
-      // ─── Sync chart theme saat dark mode di-toggle ─────────────────
-      // (Observasi perubahan class 'dark' pada elemen <html>)
-      const observer = new MutationObserver(() => {
-          const mode = isDark() ? 'dark' : 'light';
-          lineChart.updateOptions({ theme: { mode }, tooltip: { theme: mode }, grid: { borderColor: isDark() ? '#374151' : '#e5e7eb' } });
-          donutChart.updateOptions({ theme: { mode }, tooltip: { theme: mode } });
-      });
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-  });
-  </script>
-  @endpush
-  ```
-
-  > 💡 **Penjelasan MutationObserver:** Karena dark mode di-toggle dengan menambahkan/menghapus class `dark` di tag `<html>`, kita menggunakan `MutationObserver` untuk mendeteksi perubahan itu secara real-time dan mengupdate tema chart secara otomatis. Tidak perlu refresh!
-
-- [ ] **4.2** Isi bagian **SECTION 2** di `dashboard.blade.php` dengan container chart:
-
-  ```html
-  {{-- SECTION 2: Charts Row --}}
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-
-      {{-- Line Chart (mengambil 2/3 lebar di desktop) --}}
-      <div class="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm p-5">
-          <div class="flex items-center justify-between mb-4">
-              <div>
-                  <h3 class="text-base font-semibold text-gray-900 dark:text-white">Revenue Overview</h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Performa revenue & expenses sepanjang tahun</p>
-              </div>
-              <span class="px-2.5 py-1 text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full">
-                  2024
-              </span>
-          </div>
-          <div id="chart-revenue"></div>
-      </div>
-
-      {{-- Donut Chart (mengambil 1/3 lebar di desktop) --}}
-      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm p-5">
-          <div class="mb-4">
-              <h3 class="text-base font-semibold text-gray-900 dark:text-white">Traffic Source</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Sumber kunjungan bulan ini</p>
-          </div>
-          <div id="chart-traffic"></div>
-      </div>
-
-  </div>
-  ```
-
-- [ ] **4.3** Verifikasi kedua chart berhasil di-render di browser. Coba toggle dark mode — chart harus berubah tema secara otomatis tanpa refresh.
-
----
-
-### 📋 Task 5: Buat Tabel "Aktivitas Terbaru"
-
-- [ ] **5.1** Isi bagian **SECTION 3** di `dashboard.blade.php` dengan tabel aktivitas menggunakan dummy data:
-
-  ```html
-  {{-- SECTION 3: Recent Activity Table --}}
-  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
-
-      {{-- Table Header --}}
-      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
-          <div>
-              <h3 class="text-base font-semibold text-gray-900 dark:text-white">Aktivitas Terbaru</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">10 aktivitas terakhir di sistem</p>
-          </div>
-          <a href="#" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
-              Lihat semua →
-          </a>
-      </div>
-
-      {{-- Table --}}
-      <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-              <thead>
-                  <tr class="border-b border-gray-100 dark:border-gray-800">
-                      <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
-                      <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aktivitas</th>
-                      <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Waktu</th>
-                      <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                  </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-
-                  @php
-                  $activities = [
-                      ['name' => 'Budi Santoso',    'email' => 'budi@example.com',    'action' => 'Login ke sistem',         'time' => '2 menit lalu',    'status' => 'success'],
-                      ['name' => 'Siti Rahayu',     'email' => 'siti@example.com',    'action' => 'Update profil',           'time' => '15 menit lalu',   'status' => 'success'],
-                      ['name' => 'Ahmad Fauzi',     'email' => 'ahmad@example.com',   'action' => 'Buat order baru #1042',   'time' => '32 menit lalu',   'status' => 'pending'],
-                      ['name' => 'Dewi Lestari',    'email' => 'dewi@example.com',    'action' => 'Upload dokumen',          'time' => '1 jam lalu',      'status' => 'success'],
-                      ['name' => 'Rudi Hermawan',   'email' => 'rudi@example.com',    'action' => 'Gagal login (3x)',        'time' => '2 jam lalu',      'status' => 'danger'],
-                      ['name' => 'Maya Putri',      'email' => 'maya@example.com',    'action' => 'Export laporan PDF',      'time' => '3 jam lalu',      'status' => 'success'],
-                      ['name' => 'Eko Prasetyo',    'email' => 'eko@example.com',     'action' => 'Hapus data produk',       'time' => '5 jam lalu',      'status' => 'warning'],
-                      ['name' => 'Fitri Handayani', 'email' => 'fitri@example.com',   'action' => 'Tambah user baru',        'time' => '6 jam lalu',      'status' => 'success'],
-                  ];
-
-                  $statusConfig = [
-                      'success' => ['bg' => 'bg-green-50 dark:bg-green-900/20',   'text' => 'text-green-700 dark:text-green-400',   'dot' => 'bg-green-500',   'label' => 'Berhasil'],
-                      'pending' => ['bg' => 'bg-yellow-50 dark:bg-yellow-900/20', 'text' => 'text-yellow-700 dark:text-yellow-400', 'dot' => 'bg-yellow-500',  'label' => 'Pending'],
-                      'warning' => ['bg' => 'bg-orange-50 dark:bg-orange-900/20', 'text' => 'text-orange-700 dark:text-orange-400', 'dot' => 'bg-orange-500',  'label' => 'Peringatan'],
-                      'danger'  => ['bg' => 'bg-red-50 dark:bg-red-900/20',       'text' => 'text-red-700 dark:text-red-400',       'dot' => 'bg-red-500',     'label' => 'Gagal'],
-                  ];
-                  @endphp
-
-                  @foreach($activities as $activity)
-                  @php $cfg = $statusConfig[$activity['status']]; @endphp
-                  <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-
-                      {{-- User Info --}}
-                      <td class="px-5 py-3.5">
-                          <div class="flex items-center gap-3">
-                              <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-400 flex-shrink-0">
-                                  {{ strtoupper(substr($activity['name'], 0, 2)) }}
-                              </div>
-                              <div>
-                                  <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $activity['name'] }}</p>
-                                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ $activity['email'] }}</p>
-                              </div>
-                          </div>
-                      </td>
-
-                      {{-- Action --}}
-                      <td class="px-5 py-3.5 text-gray-700 dark:text-gray-300">
-                          {{ $activity['action'] }}
-                      </td>
-
-                      {{-- Time (hidden on mobile) --}}
-                      <td class="px-5 py-3.5 text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                          {{ $activity['time'] }}
-                      </td>
-
-                      {{-- Status Badge --}}
-                      <td class="px-5 py-3.5">
-                          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium {{ $cfg['bg'] }} {{ $cfg['text'] }}">
-                              <span class="w-1.5 h-1.5 rounded-full {{ $cfg['dot'] }}"></span>
-                              {{ $cfg['label'] }}
-                          </span>
-                      </td>
-
-                  </tr>
-                  @endforeach
-
-              </tbody>
-          </table>
-      </div>
-
-      {{-- Table Footer --}}
-      <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 text-center">
-          <p class="text-xs text-gray-400 dark:text-gray-500">
-              Menampilkan 8 dari 128 aktivitas
-          </p>
-      </div>
-
-  </div>
-  ```
-
-- [ ] **5.2** Verifikasi: Tabel muncul dengan rapi dan badge status berwarna sesuai.
-
----
-
-### 🔀 Task 6: Commit & Push ke Branch Baru
-
-- [ ] **6.1** Buat branch baru dari `main`:
+- [ ] **8.1** Buat branch baru dari `main`:
   ```bash
-  git checkout -b feature/dashboard-ui
+  git checkout -b feature/form-components
   ```
 
-- [ ] **6.2** Staging semua file yang berubah:
+- [ ] **8.2** Staging semua file baru:
   ```bash
-  git add resources/views/pages/dashboard.blade.php
-  git add resources/views/components/ui/stat-card.blade.php
+  git add resources/views/pages/forms.blade.php
+  git add resources/views/components/form/
+  git add routes/web.php
   ```
 
-- [ ] **6.3** Commit:
+- [ ] **8.3** Commit:
   ```bash
-  git commit -m "feat: implement dashboard UI with stat cards, charts, and activity table"
+  git commit -m "feat: add reusable form components (input, textarea, select, checkbox, radio, button)"
   ```
 
-- [ ] **6.4** Push ke remote:
+- [ ] **8.4** Push ke remote:
   ```bash
-  git push origin feature/dashboard-ui
+  git push origin feature/form-components
   ```
 
 ---
@@ -577,26 +772,30 @@ Issue ini dinyatakan **Done** jika dan hanya jika **semua** kriteria berikut ter
 
 | # | Kriteria | Cara Verifikasi |
 |---|----------|-----------------|
-| **AC-1** | ✅ 4 Stat Cards tampil dalam grid responsive | Desktop: 4 kolom → Tablet: 2 kolom → Mobile: 1 kolom |
-| **AC-2** | ✅ Stat Card menggunakan reusable Blade Component | Cek bahwa `<x-ui.stat-card>` dipanggil di dashboard, bukan HTML manual |
-| **AC-3** | ✅ Icon trend naik hijau, turun merah | Card "Revenue" (trend: down) tampil merah, sisanya hijau |
-| **AC-4** | ✅ Line Chart (Revenue Overview) berhasil di-render | Chart muncul dengan 2 seri data dan animasi smooth |
-| **AC-5** | ✅ Donut Chart (Traffic Source) berhasil di-render | Chart muncul dengan 4 segment dan legend di bawah |
-| **AC-6** | ✅ Kedua chart berubah tema saat Dark Mode di-toggle | Toggle dark mode → chart otomatis ganti warna tanpa refresh |
-| **AC-7** | ✅ Tabel Aktivitas Terbaru muncul dengan benar | 8 baris data, badge status berwarna sesuai kategori |
-| **AC-8** | ✅ Tabel responsive di mobile | Kolom "Waktu" tersembunyi di layar kecil (`hidden sm:table-cell`) |
-| **AC-9** | ✅ Dark Mode berfungsi pada semua elemen | Card, chart, tabel, dan badge semuanya berubah tema |
-| **AC-10** | ✅ Tidak ada error di browser console | DevTools → Console tab bersih tanpa error JavaScript |
+| **AC-1** | ✅ Halaman demo `/forms` bisa diakses | Buka `http://127.0.0.1:8000/forms` — tidak ada error |
+| **AC-2** | ✅ Input `normal state` tampil benar | Border abu-abu, tidak ada focus ring |
+| **AC-3** | ✅ Input `focus state` tampil benar | Klik input → border biru + indigo ring muncul |
+| **AC-4** | ✅ Input `error state` tampil benar | Prop `error` terisi → border merah + ikon + pesan error |
+| **AC-5** | ✅ Input `disabled state` tampil benar | Opacity berkurang, cursor not-allowed, tidak bisa diklik |
+| **AC-6** | ✅ Textarea berfungsi dan bisa di-resize | Bisa diketik, bisa di-drag untuk resize secara vertikal |
+| **AC-7** | ✅ Select dropdown berfungsi | Pilihan tersedia, chevron custom muncul, nilai terpilih tersimpan |
+| **AC-8** | ✅ Checkbox custom styling aktif | Centang berwarna indigo (bukan biru default browser) |
+| **AC-9** | ✅ Radio button custom styling aktif | Pilihan berwarna indigo, hanya 1 yang bisa dipilih per grup |
+| **AC-10** | ✅ Button semua variant tampil berbeda | Primary biru, Secondary abu outline, Danger merah, dll. |
+| **AC-11** | ✅ Button `loading` state aktif | Spinner berputar + button tidak bisa diklik |
+| **AC-12** | ✅ Semua komponen konsisten di Dark Mode | Latar gelap, teks terang, border gelap — tidak ada elemen yang "ghost"/tak terlihat |
+| **AC-13** | ✅ Semua komponen dipanggil via `<x-form.*>` | Tidak ada komponen yang di-hardcode langsung sebagai HTML di `forms.blade.php` |
+| **AC-14** | ✅ Form demo lengkap terlihat kohesif | Section "Tambah User Baru" tampil rapi, semua komponen berjalan bersama |
 
 ---
 
 ## 📎 Referensi & Resources
 
-- 📈 [ApexCharts Documentation](https://apexcharts.com/docs/installation/) — Panduan lengkap konfigurasi chart
-- 📈 [ApexCharts React Examples](https://apexcharts.com/javascript-chart-demos/) — Gallery contoh chart untuk inspirasi
-- 🎨 [Tailwind Grid System](https://tailwindcss.com/docs/grid-template-columns) — Panduan penggunaan CSS Grid
-- 🔧 [Blade Components Documentation](https://laravel.com/docs/blade#components) — Cara membuat dan menggunakan Blade Component
-- 🎭 [Tailwind Dark Mode Classes](https://tailwindcss.com/docs/dark-mode) — Referensi kelas `dark:` untuk setiap elemen
+- 🎨 [Tailwind CSS Forms Plugin](https://github.com/tailwindlabs/tailwindcss-forms) — Plugin reset form style yang sudah kita install
+- 📖 [Blade Components - `@props`](https://laravel.com/docs/blade#component-attributes) — Cara menggunakan props di Blade Component
+- 📖 [Blade `$attributes->merge()`](https://laravel.com/docs/blade#merging-attributes) — Cara merge class dari luar dengan class default component
+- 🎨 [Tailwind Focus Ring](https://tailwindcss.com/docs/ring-width) — Konfigurasi focus ring (ring, ring-offset, ring-color)
+- ♿ [Web Accessibility - Form Labels](https://www.w3.org/WAI/tutorials/forms/labels/) — Standar aksesibilitas untuk form elements
 
 ---
 
