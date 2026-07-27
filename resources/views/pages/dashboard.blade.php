@@ -4,7 +4,7 @@
 
 @section('content')
     {{-- SECTION 1: Stats Overview (Task 3) --}}
-    <div class="grid grid-cols-1 gap-5 mb-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-4 sm:gap-5 mb-6 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat-card label="Total Users"  value="1,284"  change="+12.5%" trend="up"   icon="users"           color="blue"   />
         <x-ui.stat-card label="Total Orders" value="843"    change="+8.2%"  trend="up"   icon="shopping-bag"    color="green"  />
         <x-ui.stat-card label="Revenue"      value="$24,780" change="-3.1%" trend="down" icon="currency-dollar" color="yellow" />
@@ -12,38 +12,43 @@
     </div>
 
     {{-- SECTION 2: Charts (Task 4) --}}
-    <div class="grid grid-cols-1 gap-5 mb-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 sm:gap-5 mb-6 lg:grid-cols-3">
         {{-- Area Chart: Revenue Overview --}}
-        <div class="p-5 bg-white border border-gray-200 rounded-xl shadow-sm lg:col-span-2 dark:bg-gray-900 dark:border-gray-800">
-            <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Revenue Overview</h3>
+        <div class="p-5 bg-white border border-gray-200 rounded-2xl shadow-sm lg:col-span-2 dark:bg-gray-900 dark:border-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Revenue Overview</h3>
+                <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Jan – Dec {{ date('Y') }}</span>
+            </div>
             <div id="chart-revenue"></div>
         </div>
-        
+
         {{-- Donut Chart: Traffic Source --}}
-        <div class="p-5 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
-            <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Traffic Source</h3>
+        <div class="p-5 bg-white border border-gray-200 rounded-2xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
+            <h3 class="mb-4 text-base font-semibold text-gray-900 dark:text-white">Traffic Source</h3>
             <div id="chart-traffic"></div>
         </div>
     </div>
 
     {{-- SECTION 3: Recent Activity Table (Task 5) --}}
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800 overflow-hidden">
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm dark:bg-gray-900 dark:border-gray-800 overflow-hidden">
         <div class="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-800">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Aktivitas Terbaru</h3>
-            <a href="#" class="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">Lihat semua &rarr;</a>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Aktivitas Terbaru</h3>
+            <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
+                Lihat semua &rarr;
+            </a>
         </div>
-        
+
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+                <thead class="text-xs text-gray-500 uppercase bg-gray-50/80 dark:bg-gray-800/50 dark:text-gray-400">
                     <tr>
-                        <th scope="col" class="px-6 py-3">User</th>
-                        <th scope="col" class="px-6 py-3">Aktivitas</th>
-                        <th scope="col" class="px-6 py-3 hidden sm:table-cell">Waktu</th>
-                        <th scope="col" class="px-6 py-3">Status</th>
+                        <th scope="col" class="px-6 py-3 font-medium tracking-wide">User</th>
+                        <th scope="col" class="px-6 py-3 font-medium tracking-wide">Aktivitas</th>
+                        <th scope="col" class="px-6 py-3 font-medium tracking-wide hidden sm:table-cell">Waktu</th>
+                        <th scope="col" class="px-6 py-3 font-medium tracking-wide">Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @php
                         // Dummy Data untuk tabel (8 baris)
                         $activities = [
@@ -59,18 +64,19 @@
                     @endphp
 
                     @foreach($activities as $activity)
-                    <tr class="border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                        <td class="px-6 py-4 flex items-center gap-3">
-                            <img class="w-8 h-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode($activity['name']) }}&background=random" alt="Avatar">
-                            <div>
-                                <div class="font-medium text-gray-900 dark:text-white">{{ $activity['name'] }}</div>
-                                <div class="text-xs text-gray-500">{{ $activity['email'] }}</div>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="px-6 py-3.5 flex items-center gap-3 whitespace-nowrap">
+                            <img class="w-8 h-8 rounded-full ring-2 ring-gray-100 dark:ring-gray-800" src="https://ui-avatars.com/api/?name={{ urlencode($activity['name']) }}&background=random" alt="Avatar">
+                            <div class="min-w-0">
+                                <div class="font-medium text-gray-900 dark:text-white truncate">{{ $activity['name'] }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $activity['email'] }}</div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">{{ $activity['action'] }}</td>
-                        <td class="px-6 py-4 hidden sm:table-cell">{{ $activity['time'] }}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-{{ $activity['color'] }}-100 text-{{ $activity['color'] }}-800 dark:bg-{{ $activity['color'] }}-900/30 dark:text-{{ $activity['color'] }}-400">
+                        <td class="px-6 py-3.5">{{ $activity['action'] }}</td>
+                        <td class="px-6 py-3.5 hidden sm:table-cell whitespace-nowrap">{{ $activity['time'] }}</td>
+                        <td class="px-6 py-3.5">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-{{ $activity['color'] }}-100 text-{{ $activity['color'] }}-800 dark:bg-{{ $activity['color'] }}-900/30 dark:text-{{ $activity['color'] }}-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-{{ $activity['color'] }}-500"></span>
                                 {{ ucfirst($activity['status']) }}
                             </span>
                         </td>
@@ -79,8 +85,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="p-4 text-sm text-gray-500 border-t border-gray-200 dark:border-gray-800 dark:text-gray-400">
-            Menampilkan 8 dari 128 aktivitas
+        <div class="p-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
+            Menampilkan <span class="font-medium text-gray-700 dark:text-gray-300">8</span> dari <span class="font-medium text-gray-700 dark:text-gray-300">128</span> aktivitas
         </div>
     </div>
 @endsection
@@ -112,9 +118,23 @@
                     background: 'transparent'
                 },
                 theme: { mode: getThemeMode() },
-                colors: ['#3b82f6', '#f43f5e'],
+                colors: ['#4f46e5', '#f43f5e'],
                 dataLabels: { enabled: false },
-                stroke: { curve: 'smooth', width: 2 },
+                stroke: { curve: 'smooth', width: 2.5 },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.35,
+                        opacityTo: 0.05,
+                        stops: [0, 90, 100]
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    fontFamily: 'inherit'
+                },
                 xaxis: {
                     categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     axisBorder: { show: false },
@@ -122,7 +142,7 @@
                 },
                 yaxis: { labels: { formatter: (value) => "$" + value } },
                 grid: {
-                    borderColor: isDark() ? '#374151' : '#f3f4f6',
+                    borderColor: isDark() ? '#1f2937' : '#f3f4f6',
                     strokeDashArray: 4,
                 }
             };
@@ -138,19 +158,20 @@
                     background: 'transparent'
                 },
                 theme: { mode: getThemeMode() },
-                colors: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'],
+                colors: ['#10b981', '#4f46e5', '#8b5cf6', '#f59e0b'],
                 plotOptions: {
                     pie: {
                         donut: {
-                            size: '70%',
+                            size: '72%',
                             labels: {
                                 show: true,
                                 name: { show: true },
-                                value: { show: true },
+                                value: { show: true, fontWeight: 600 },
                                 total: {
                                     show: true,
                                     showAlways: true,
                                     label: 'Total Visits',
+                                    fontSize: '13px',
                                     color: isDark() ? '#9ca3af' : '#6b7280'
                                 }
                             }
@@ -158,38 +179,47 @@
                     }
                 },
                 dataLabels: { enabled: false },
-                legend: { position: 'bottom' },
-                stroke: { show: false }
+                legend: {
+                    position: 'bottom',
+                    fontFamily: 'inherit'
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: [isDark() ? '#111827' : '#ffffff']
+                }
             };
 
             // Render Charts
             const revenueChart = new ApexCharts(document.querySelector("#chart-revenue"), revenueOptions);
             const trafficChart = new ApexCharts(document.querySelector("#chart-traffic"), trafficOptions);
-            
+
             revenueChart.render();
             trafficChart.render();
 
             // 3. Auto-sync Dark Mode tanpa Refresh
             const observer = new MutationObserver(() => {
                 const mode = getThemeMode();
-                const gridColor = mode === 'dark' ? '#374151' : '#f3f4f6';
+                const gridColor = mode === 'dark' ? '#1f2937' : '#f3f4f6';
                 const labelColor = mode === 'dark' ? '#9ca3af' : '#6b7280';
+                const strokeColor = mode === 'dark' ? '#111827' : '#ffffff';
 
-                revenueChart.updateOptions({ 
+                revenueChart.updateOptions({
                     theme: { mode },
                     grid: { borderColor: gridColor }
                 });
-                
-                trafficChart.updateOptions({ 
+
+                trafficChart.updateOptions({
                     theme: { mode },
+                    stroke: { colors: [strokeColor] },
                     plotOptions: { pie: { donut: { labels: { total: { color: labelColor } } } } }
                 });
             });
 
             // Pantau perubahan atribut 'class' pada tag <html>
-            observer.observe(document.documentElement, { 
-                attributes: true, 
-                attributeFilter: ['class'] 
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['class']
             });
         });
     </script>
