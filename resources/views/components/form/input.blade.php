@@ -1,31 +1,63 @@
-@props(['name', 'label' => '', 'type' => 'text', 'placeholder' => '', 'value' => '', 'error' => '', 'hint' => '', 'required' => false, 'disabled' => false])
+@props([
+    'name',
+    'label' => null,
+    'type' => 'text',
+    'placeholder' => null,
+    'value' => null,
+    'error' => null,
+    'hint' => null,
+    'required' => false,
+    'disabled' => false,
+])
 
-<div class="mb-4">
-    @if($label)
-        <label for="{{ $name }}" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-            {{ $label }} @if($required) <span class="text-red-500">*</span> @endif
+@php
+    $inputId = $attributes->get('id', $name);
+    $hasError = filled($error);
+@endphp
+
+<div class="w-full">
+    @if ($label)
+        <label for="{{ $inputId }}" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ $label }}
+            @if ($required)
+                <span class="text-red-500">*</span>
+            @endif
         </label>
     @endif
+
     <div class="relative">
         <input
             type="{{ $type }}"
             name="{{ $name }}"
-            id="{{ $name }}"
+            id="{{ $inputId }}"
+            @if ($placeholder) placeholder="{{ $placeholder }}" @endif
+            @if ($required) required @endif
+            @if ($disabled) disabled @endif
             value="{{ old($name, $value) }}"
-            placeholder="{{ $placeholder }}"
-            @disabled($disabled)
-            @required($required)
-            {{ $attributes->merge(['class' => 'block w-full rounded-md shadow-sm sm:text-sm transition-colors duration-200 ' . ($error ? 'border-red-400 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500 dark:bg-red-900/20 dark:border-red-500 dark:text-red-400' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white') . ($disabled ? ' bg-gray-50 text-gray-500 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500' : '')]) }}
-        >
-        @if($error)
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+            {{ $attributes->merge([
+                'class' => 'block w-full rounded-lg border px-3.5 py-2.5 text-sm shadow-sm transition
+                    bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                    placeholder:text-gray-400 dark:placeholder:text-gray-500
+                    focus:outline-none focus:ring-2
+                    disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-800
+                    ' . ($hasError
+                        ? 'border-red-400 focus:border-red-400 focus:ring-red-300/60 pr-10'
+                        : 'border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-300/60 dark:focus:ring-indigo-500/30'),
+            ]) }}
+        />
+
+        @if ($hasError)
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.486 0l6.516 11.598c.75 1.334-.213 2.987-1.743 2.987H3.484c-1.53 0-2.493-1.653-1.743-2.987L8.257 3.1zM11 13a1 1 0 10-2 0 1 1 0 002 0zm-.25-5.5a.75.75 0 00-1.5 0v3a.75.75 0 001.5 0v-3z" clip-rule="evenodd" />
+                </svg>
             </div>
         @endif
     </div>
-    @if($error)
-        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $error }}</p>
-    @elseif($hint)
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $hint }}</p>
+
+    @if ($hasError)
+        <p class="mt-1.5 text-sm text-red-500">{{ $error }}</p>
+    @elseif ($hint)
+        <p class="mt-1.5 text-sm text-gray-400 dark:text-gray-500">{{ $hint }}</p>
     @endif
 </div>

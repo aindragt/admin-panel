@@ -1,78 +1,199 @@
 @extends('layouts.app')
-@section('title', 'Form Components — ' . config('app.name'))
-@section('page-title', 'Form Design System')
+
+@section('title', 'Form Components')
 
 @section('content')
-<div class="grid grid-cols-1 gap-8">
+<div class="mx-auto max-w-5xl space-y-12 px-4 py-8">
 
-    {{-- SECTION: Component Showcases --}}
-    <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
-        <h2 class="mb-5 text-lg font-semibold text-gray-900 dark:text-white">Daftar Komponen Individu</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <x-form.input name="normal" label="Normal Input" placeholder="Ketik sesuatu..." />
-            <x-form.input name="error_input" label="Error Input" value="salah@email" error="Format email tidak valid" />
-            <x-form.input name="disabled_input" label="Disabled Input" value="Tidak bisa diedit" disabled />
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <x-form.textarea name="bio_demo" label="Bio (Textarea)" placeholder="Bisa di-resize ke bawah..." />
-            <x-form.select name="role_demo" label="Role Pengguna" placeholder="Pilih role..." :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']" />
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Form Components</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Demo semua elemen form yang reusable — input, textarea, select, checkbox, radio, dan button.
+        </p>
+    </div>
+
+    {{-- ================= SECTION 1: INPUT & TEXTAREA ================= --}}
+    <section>
+        <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">1. Input &amp; Textarea</h2>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <x-form.input
+                name="normal_field"
+                label="Normal State"
+                placeholder="Ketik sesuatu..."
+            />
+
+            <x-form.input
+                name="focus_field"
+                label="Focus State (klik untuk lihat)"
+                placeholder="Klik di sini"
+            />
+
+            <x-form.input
+                name="error_field"
+                label="Error State"
+                placeholder="you@example.com"
+                error="Format email tidak valid."
+            />
+
+            <x-form.input
+                name="required_field"
+                label="Required Field"
+                placeholder="Wajib diisi"
+                :required="true"
+            />
+
+            <x-form.input
+                name="disabled_field"
+                label="Disabled State"
+                placeholder="Tidak bisa diedit"
+                value="Nilai terkunci"
+                :disabled="true"
+            />
+
+            <x-form.input
+                name="password_field"
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                hint="Minimal 8 karakter."
+            />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-                <x-form.checkbox name="terms_demo" label="Saya setuju (Checkbox)" checked />
-                <x-form.checkbox name="news_demo" label="Newsletter" hint="Dapatkan update terbaru." />
-            </div>
-            <div>
-                <x-form.radio name="gender_demo" value="male" label="Laki-laki (Radio)" checked />
-                <x-form.radio name="gender_demo" value="female" label="Perempuan (Radio)" />
-            </div>
+        <div class="mt-6">
+            <x-form.textarea
+                name="bio_demo"
+                label="Textarea (bisa di-resize vertikal)"
+                placeholder="Tulis deskripsi singkat..."
+                rows="4"
+                hint="Tarik sudut kanan bawah untuk mengubah tinggi."
+            />
+        </div>
+    </section>
+
+    {{-- ================= SECTION 2: SELECT, CHECKBOX, RADIO ================= --}}
+    <section>
+        <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">2. Select, Checkbox &amp; Radio</h2>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <x-form.select
+                name="role_demo"
+                label="Role Pengguna"
+                placeholder="Pilih role"
+                :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
+            />
+
+            <x-form.select
+                name="role_error_demo"
+                label="Select dengan Error"
+                placeholder="Pilih role"
+                :options="['admin' => 'Administrator', 'editor' => 'Editor']"
+                error="Role wajib dipilih."
+            />
         </div>
 
-        <div>
-            <h3 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Variasi Tombol</h3>
-            <div class="flex flex-wrap gap-3 items-center">
+        <div class="mt-6 space-y-3">
+            <x-form.checkbox name="terms" label="Saya setuju dengan syarat &amp; ketentuan." :checked="true" />
+            <x-form.checkbox name="newsletter" label="Kirimi saya newsletter mingguan." />
+            <x-form.checkbox name="marketing" label="Izinkan email promosi." :disabled="true" />
+        </div>
+
+        <div class="mt-6 space-y-3">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Kelamin</p>
+            <x-form.radio name="gender" value="male" label="Laki-laki" :checked="true" />
+            <x-form.radio name="gender" value="female" label="Perempuan" />
+        </div>
+    </section>
+
+    {{-- ================= SECTION 3: BUTTONS ================= --}}
+    <section>
+        <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">3. Buttons</h2>
+
+        <div class="space-y-4">
+            <div class="flex flex-wrap gap-3">
                 <x-form.button variant="primary">Primary</x-form.button>
                 <x-form.button variant="secondary">Secondary</x-form.button>
                 <x-form.button variant="danger">Danger</x-form.button>
                 <x-form.button variant="success">Success</x-form.button>
                 <x-form.button variant="ghost">Ghost</x-form.button>
-                <x-form.button variant="primary" loading>Loading...</x-form.button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <x-form.button variant="primary" size="sm">Small</x-form.button>
+                <x-form.button variant="primary" size="md">Medium</x-form.button>
+                <x-form.button variant="primary" size="lg">Large</x-form.button>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <x-form.button variant="primary" :disabled="true">Disabled</x-form.button>
+                <x-form.button variant="primary" :loading="true">Menyimpan...</x-form.button>
             </div>
         </div>
-    </div>
+    </section>
 
-    {{-- SECTION: Full Form Demo --}}
-    <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-900 dark:border-gray-800">
-        <h2 class="mb-5 text-xl font-semibold text-gray-900 dark:text-white">Demo: Form Tambah User Baru</h2>
-        
-        <form action="#" method="POST" class="max-w-2xl bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-form.input name="nama_depan" label="Nama Depan" required placeholder="John" />
-                <x-form.input name="nama_belakang" label="Nama Belakang" required placeholder="Doe" />
+    {{-- ================= SECTION 4: DEMO FORM LENGKAP ================= --}}
+    <section>
+        <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">4. Demo Form Lengkap — Tambah User Baru</h2>
+
+        <form method="POST" action="{{ url('/forms') }}" class="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            @csrf
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-form.input name="nama_depan" label="Nama Depan" placeholder="Budi" :required="true" />
+                <x-form.input name="nama_belakang" label="Nama Belakang" placeholder="Santoso" :required="true" />
             </div>
-            
-            <x-form.input name="email" type="email" label="Alamat Email" required placeholder="john@example.com" />
-            <x-form.input name="password" type="password" label="Password Baru" required error="Password harus mengandung kombinasi angka dan huruf." value="lemah" />
-            
-            <x-form.select name="role" label="Tetapkan Role" :options="['admin' => 'Administrator', 'user' => 'Regular User']" />
-            
-            <x-form.textarea name="bio" label="Catatan Internal" rows="3" hint="Hanya bisa dilihat oleh admin." />
-            
-            <hr class="my-6 border-gray-200 dark:border-gray-700">
-            
-            <x-form.checkbox name="notify_email" label="Kirim kredensial via Email" checked />
-            
-            <div class="mt-6 flex justify-end gap-3">
-                <x-form.button variant="secondary" type="button">Batal</x-form.button>
-                <x-form.button variant="primary">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Simpan User
+
+            <x-form.input
+                name="email"
+                type="email"
+                label="Email"
+                placeholder="budi@example.com"
+                :required="true"
+                :error="$errors->first('email') ?: null"
+            />
+
+            <x-form.input
+                name="password"
+                type="password"
+                label="Password"
+                placeholder="••••••••"
+                :required="true"
+                :error="$errors->first('password') ?: null"
+            />
+
+            <x-form.select
+                name="role"
+                label="Role"
+                placeholder="Pilih role pengguna"
+                :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
+                :required="true"
+            />
+
+            <x-form.textarea
+                name="bio"
+                label="Bio Singkat"
+                placeholder="Ceritakan sedikit tentang user ini..."
+                rows="3"
+            />
+
+            <div class="space-y-3">
+                <x-form.checkbox name="notify_email" label="Kirim notifikasi via email" :checked="true" />
+                <x-form.checkbox name="notify_system" label="Kirim notifikasi sistem" />
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-gray-100 pt-5 dark:border-gray-800">
+                <x-form.button variant="secondary" type="button" onclick="history.back()">
+                    Batal
+                </x-form.button>
+                <x-form.button variant="primary" type="submit">
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" clip-rule="evenodd" />
+                    </svg>
+                    Tambah User
                 </x-form.button>
             </div>
         </form>
-    </div>
+    </section>
 
 </div>
 @endsection

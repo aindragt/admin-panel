@@ -1,31 +1,65 @@
-@props(['name', 'label' => '', 'options' => [], 'selected' => '', 'error' => '', 'placeholder' => '', 'required' => false, 'disabled' => false])
+@props([
+    'name',
+    'label' => null,
+    'options' => [],
+    'selected' => null,
+    'error' => null,
+    'placeholder' => null,
+    'required' => false,
+    'disabled' => false,
+])
 
-<div class="mb-4">
-    @if($label)
-        <label for="{{ $name }}" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-            {{ $label }} @if($required) <span class="text-red-500">*</span> @endif
+@php
+    $inputId = $attributes->get('id', $name);
+    $hasError = filled($error);
+    $currentValue = old($name, $selected);
+@endphp
+
+<div class="w-full">
+    @if ($label)
+        <label for="{{ $inputId }}" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ $label }}
+            @if ($required)
+                <span class="text-red-500">*</span>
+            @endif
         </label>
     @endif
+
     <div class="relative">
         <select
             name="{{ $name }}"
-            id="{{ $name }}"
-            @disabled($disabled)
-            @required($required)
-            {{ $attributes->merge(['class' => 'block w-full appearance-none rounded-md shadow-sm sm:text-sm transition-colors duration-200 pr-10 ' . ($error ? 'border-red-400 text-red-900 focus:border-red-500 focus:ring-red-500 dark:bg-red-900/20 dark:border-red-500 dark:text-red-400' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white') . ($disabled ? ' bg-gray-50 text-gray-500 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500' : '')]) }}
+            id="{{ $inputId }}"
+            @if ($required) required @endif
+            @if ($disabled) disabled @endif
+            {{ $attributes->merge([
+                'class' => 'block w-full appearance-none rounded-lg border px-3.5 py-2.5 pr-10 text-sm shadow-sm transition
+                    bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                    focus:outline-none focus:ring-2
+                    disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-800
+                    ' . ($hasError
+                        ? 'border-red-400 focus:border-red-400 focus:ring-red-300/60'
+                        : 'border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-300/60 dark:focus:ring-indigo-500/30'),
+            ]) }}
         >
-            @if($placeholder)
-                <option value="" disabled {{ empty($selected) ? 'selected' : '' }}>{{ $placeholder }}</option>
+            @if ($placeholder)
+                <option value="" disabled {{ $currentValue ? '' : 'selected' }}>{{ $placeholder }}</option>
             @endif
-            @foreach($options as $val => $text)
-                <option value="{{ $val }}" {{ (string) $selected === (string) $val ? 'selected' : '' }}>{{ $text }}</option>
+
+            @foreach ($options as $value => $label)
+                <option value="{{ $value }}" @selected((string) $currentValue === (string) $value)>
+                    {{ $label }}
+                </option>
             @endforeach
         </select>
-        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 dark:text-gray-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
         </div>
     </div>
-    @if($error)
-        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $error }}</p>
+
+    @if ($hasError)
+        <p class="mt-1.5 text-sm text-red-500">{{ $error }}</p>
     @endif
 </div>
