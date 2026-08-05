@@ -62,6 +62,16 @@ State: dikontrol oleh `sidebarOpen` dari parent Alpine scope (layouts/app.blade.
             <span>Form Components</span>
         </a>
 
+        <a href="{{ route('ui.demo') }}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+          {{ request()->is('ui-components*') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>UI Components</span>
+        </a>
+
     </nav>
 
     {{-- Sidebar Footer --}}
