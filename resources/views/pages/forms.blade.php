@@ -69,6 +69,62 @@
                 hint="Tarik sudut kanan bawah untuk mengubah tinggi."
             />
         </div>
+
+        <div class="mt-8 border-t border-gray-100 pt-8 dark:border-gray-800">
+            <h3 class="mb-4 text-md font-semibold text-gray-700 dark:text-gray-300">1.1. Input Add-ons &amp; Custom File Upload (New)</h3>
+            
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {{-- Input dengan Prefix --}}
+                <x-form.input 
+                    name="price_demo" 
+                    label="Harga Produk (Prefix)" 
+                    placeholder="0" 
+                    prefix="Rp" 
+                />
+
+                {{-- Input dengan Suffix --}}
+                <x-form.input 
+                    name="website_demo" 
+                    label="Website (Suffix)" 
+                    placeholder="nama-toko" 
+                    suffix=".com" 
+                />
+
+                {{-- Input Password dengan Toggle Visibility (Alpine.js) --}}
+                <div x-data="{ show: false }">
+                    <x-form.input
+                        name="password_toggle_demo"
+                        label="Password dengan Toggle Icon"
+                        ::type="show ? 'text' : 'password'"
+                        placeholder="••••••••"
+                        :suffix-icon="true"
+                    >
+                        <x-slot name="suffixIcon">
+                            <button type="button" @click="show = !show" class="focus:outline-none text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                </svg>
+                                <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </x-slot>
+                    </x-form.input>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                {{-- Custom File Upload --}}
+                <x-form.file-upload
+                    name="laporan_pdf"
+                    label="Unggah Laporan Keuangan"
+                    accept=".pdf"
+                    maxSize="10MB"
+                    hint="Hanya file PDF yang diizinkan."
+                />
+            </div>
+        </div>
     </section>
 
     {{-- ================= SECTION 2: SELECT, CHECKBOX, RADIO ================= --}}
@@ -102,6 +158,53 @@
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Kelamin</p>
             <x-form.radio name="gender" value="male" label="Laki-laki" :checked="true" />
             <x-form.radio name="gender" value="female" label="Perempuan" />
+        </div>
+
+        <div class="mt-6 space-y-4">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Toggle Switch</p>
+            <div class="space-y-3">
+                <x-form.toggle name="notifications" label="Aktifkan notifikasi email" :checked="true" />
+                <x-form.toggle
+                    name="maintenance"
+                    label="Mode Maintenance"
+                    hint="Saat diaktifkan, hanya admin yang bisa mengakses aplikasi."
+                    :checked="false"
+                />
+                <x-form.toggle name="feature_beta" label="Fitur Beta (Segera Hadir)" :disabled="true" />
+            </div>
+        </div>
+
+        <div class="mt-8 border-t border-gray-100 pt-8 dark:border-gray-800">
+            <h3 class="mb-4 text-md font-semibold text-gray-700 dark:text-gray-300">2.1. Datepicker &amp; Advanced Select (New)</h3>
+            
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {{-- Datepicker Component --}}
+                <x-form.datepicker
+                    name="birth_date_demo"
+                    label="Tanggal Lahir (Datepicker)"
+                    placeholder="Pilih tanggal"
+                    hint="Pilih tanggal lahir Anda sesuai KTP."
+                />
+
+                {{-- Searchable Select Component --}}
+                @php
+                    $provinces = [
+                        'jawa_barat'   => 'Jawa Barat',
+                        'jawa_tengah'  => 'Jawa Tengah',
+                        'jawa_timur'   => 'Jawa Timur',
+                        'dki_jakarta'  => 'DKI Jakarta',
+                        'banten'       => 'Banten',
+                        'bali'         => 'Bali',
+                    ];
+                @endphp
+                <x-form.select-search
+                    name="province_demo"
+                    label="Provinsi (Searchable Select)"
+                    placeholder="Cari & pilih provinsi..."
+                    :options="$provinces"
+                    selected="jawa_tengah"
+                />
+            </div>
         </div>
     </section>
 
