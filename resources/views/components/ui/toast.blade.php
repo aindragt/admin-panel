@@ -5,7 +5,7 @@
 ])
 
 @php
-    $config = [
+    $configs = [
         'success' => [
             'bg' => 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/60',
             'text' => 'text-emerald-800 dark:text-emerald-400',
@@ -30,12 +30,30 @@
             'iconColor' => 'text-blue-500',
             'icon' => '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
         ],
-    ][$type] ?? $config['success'];
+    ];
 @endphp
 
 <div
-    x-data="{ visible: true }"
-    x-init="setTimeout(() => { visible = false; }, {{ $duration }})"
+    x-data="{ 
+        visible: true,
+        type: '{{ $type }}',
+        message: '{{ $message }}',
+        configs: {{ Js::from($configs) }},
+        get config() {
+            return this.configs[this.type] || this.configs['success'];
+        }
+    }"
+    x-init="
+        if ($el.parentElement && $el.parentElement.__x_for_key) {
+            {{-- Jika dirender di dalam loop x-for (seperti tumpukan toast) --}}
+            const toastData = Alpine.raw($data.toast);
+            if (toastData) {
+                type = toastData.type;
+                message = toastData.message;
+            }
+        }
+        setTimeout(() => { visible = false; }, {{ $duration }});
+    "
     x-show="visible"
     x-transition:enter="transition ease-out duration-300"
     x-transition:enter-start="opacity-0 translate-x-12"
@@ -43,18 +61,15 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0 scale-95"
-    class="flex items-center gap-3 w-full max-w-sm p-4 rounded-xl border shadow-lg {{ $config['bg'] }}"
+    class="flex items-center gap-3 w-full max-w-sm p-4 rounded-xl border shadow-lg bg-white dark:bg-gray-900"
+    :class="config.bg"
     role="alert"
 >
     {{-- Toast Icon --}}
-    <span class="{{ $config['iconColor'] }} flex-shrink-0">
-        {!! $config['icon'] !!}
-    </span>
+    <span class="flex-shrink-0" :class="config.iconColor" x-html="config.icon"></span>
 
     {{-- Message Teks --}}
-    <p class="text-sm font-medium {{ $config['text'] }} flex-1">
-        {{ $message }}
-    </p>
+    <p class="text-sm font-medium flex-1" :class="config.text" x-text="message"></p>
 
     {{-- Close Button --}}
     <button
