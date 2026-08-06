@@ -48,119 +48,243 @@
         $avatarPalette = ['bg-indigo-500', 'bg-rose-500', 'bg-amber-500', 'bg-teal-500', 'bg-violet-500', 'bg-sky-500'];
     @endphp
 
-    <x-table.wrapper title="Daftar Pengguna" subtitle="Total {{ count($users) }} pengguna">
-        <x-slot name="toolbar">
-            <div class="w-full sm:w-64">
-                <x-form.input name="search" placeholder="Cari nama atau email..." />
-            </div>
-            <x-form.button variant="secondary" size="sm">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 01.628.74v2.288a2.25 2.25 0 01-.659 1.59l-4.682 4.683a2.25 2.25 0 00-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 018 18.25v-5.757a2.25 2.25 0 00-.659-1.591L2.659 6.22A2.25 2.25 0 012 4.629V2.34a.75.75 0 01.628-.74z" clip-rule="evenodd" />
-                </svg>
-                Filter
-            </x-form.button>
-            <x-form.button variant="primary" size="sm">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" clip-rule="evenodd" />
-                </svg>
-                Tambah Data
-            </x-form.button>
-        </x-slot>
-
-        <table class="w-full min-w-[880px] divide-y divide-gray-100 dark:divide-gray-800">
-            <thead class="bg-gray-50 dark:bg-gray-800/50">
-                <tr>
-                    <x-table.th>
-                        <x-form.checkbox name="select_all" value="1" />
-                    </x-table.th>
-                    <x-table.th sortable sorted="asc">Nama</x-table.th>
-                    <x-table.th sortable>Email</x-table.th>
-                    <x-table.th>Role</x-table.th>
-                    <x-table.th>Status</x-table.th>
-                    <x-table.th sortable>Bergabung</x-table.th>
-                    <x-table.th class="text-right">Aksi</x-table.th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                @foreach ($users as $index => $user)
-                    <tr
-                        class="table-row-in group transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-800/40"
-                        style="animation-delay: {{ $index * 40 }}ms"
+    {{-- scope x-data untuk mendeteksi pilihan bulk checkboxes --}}
+    <div x-data="{
+        selectedRows: [],
+        allRows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        get isAllSelected() {
+            return this.allRows.length > 0 && this.selectedRows.length === this.allRows.length;
+        },
+        get hasSelection() {
+            return this.selectedRows.length > 0;
+        },
+        toggleAll() {
+            if (this.isAllSelected) {
+                this.selectedRows = [];
+            } else {
+                this.selectedRows = [...this.allRows];
+            }
+        },
+        clearSelection() {
+            this.selectedRows = [];
+        }
+    }">
+        <x-table.wrapper title="Daftar Pengguna" subtitle="Total {{ count($users) }} pengguna">
+            <x-slot name="toolbar">
+                <div class="w-full sm:w-64">
+                    <x-form.input name="search" placeholder="Cari nama atau email..." />
+                </div>
+                <div x-data="{ filterOpen: false }" @click.outside="filterOpen = false" class="relative">
+                    <button
+                        type="button"
+                        @click="filterOpen = !filterOpen"
+                        :class="filterOpen ? 'bg-indigo-50 text-indigo-700 border-indigo-300 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-700' : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700'"
+                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium shadow-sm transition hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                     >
-                        <td class="whitespace-nowrap px-5 py-3.5">
-                            <x-form.checkbox name="selected_users[]" :value="$user['id']" />
-                        </td>
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                        Filter
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="filterOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
 
-                        <td class="whitespace-nowrap px-5 py-3.5">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white transition-transform duration-150 group-hover:scale-105 {{ $avatarPalette[$index % count($avatarPalette)] }}">
-                                    {{ $getInitials($user['name']) }}
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900 dark:text-white">{{ $user['name'] }}</p>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500">ID #{{ str_pad($user['id'], 4, '0', STR_PAD_LEFT) }}</p>
-                                </div>
+                    <div
+                        x-show="filterOpen"
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="absolute right-0 top-full mt-2 z-30 w-72 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-4 space-y-4"
+                        style="display: none;"
+                    >
+                        <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                            📌 Filter Pengguna
+                        </p>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                            <select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
+                                <option value="">Semua Role</option>
+                                <option value="admin">Administrator</option>
+                                <option value="editor">Editor</option>
+                                <option value="viewer">Viewer</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                                    <input type="radio" name="filter_status" value="" checked class="h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500">
+                                    Semua Status
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                                    <input type="radio" name="filter_status" value="active" class="h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500">
+                                    Aktif
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                                    <input type="radio" name="filter_status" value="inactive" class="h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500">
+                                    Nonaktif
+                                </label>
                             </div>
-                        </td>
+                        </div>
 
-                        <td class="whitespace-nowrap px-5 py-3.5 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $user['email'] }}
-                        </td>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                            <button type="button" @click="filterOpen = false" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                                Reset
+                            </button>
+                            <button type="button" @click="filterOpen = false" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-sm font-medium text-white transition-colors">
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                        <td class="whitespace-nowrap px-5 py-3.5">
-                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $roleStyles[$user['role']] }}">
-                                {{ $user['role'] }}
-                            </span>
-                        </td>
+                <x-form.button variant="primary" size="sm">
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" clip-rule="evenodd" />
+                    </svg>
+                    Tambah Data
+                </x-form.button>
+            </x-slot>
 
-                        <td class="whitespace-nowrap px-5 py-3.5">
-                            @php $status = $statusStyles[$user['status']]; @endphp
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $status['bg'] }} {{ $status['text'] }}">
-                                <span class="relative flex h-1.5 w-1.5">
-                                    @if ($user['status'] === 'active')
-                                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full {{ $status['dot'] }} opacity-60"></span>
-                                    @endif
-                                    <span class="relative inline-flex h-1.5 w-1.5 rounded-full {{ $status['dot'] }}"></span>
-                                </span>
-                                {{ $status['label'] }}
-                            </span>
-                        </td>
-
-                        <td class="whitespace-nowrap px-5 py-3.5 text-sm text-gray-500 dark:text-gray-400">
-                            {{ $user['joined'] }}
-                        </td>
-
-                        <td class="whitespace-nowrap px-5 py-3.5">
-                            <div class="flex items-center justify-end gap-1 opacity-0 transition-all duration-200 translate-x-1 group-hover:translate-x-0 group-hover:opacity-100">
-                                <button type="button" title="Lihat" class="rounded-lg p-1.5 text-gray-500 transition-all duration-150 hover:scale-110 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-                                        <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.147.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                                <button type="button" title="Edit" class="rounded-lg p-1.5 text-blue-500 transition-all duration-150 hover:scale-110 hover:bg-blue-50 dark:hover:bg-blue-500/10">
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793z" />
-                                        <path d="M11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                    </svg>
-                                </button>
-                                <button type="button" title="Hapus" class="rounded-lg p-1.5 text-red-500 transition-all duration-150 hover:scale-110 hover:bg-red-50 dark:hover:bg-red-500/10">
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
+            <table class="w-full min-w-[880px] divide-y divide-gray-100 dark:divide-gray-800">
+                <thead class="bg-gray-50 dark:bg-gray-800/50">
+                    <tr>
+                        <x-table.th class="w-10 px-4 py-3">
+                            <input
+                                type="checkbox"
+                                :checked="isAllSelected"
+                                :indeterminate="selectedRows.length > 0 && !isAllSelected"
+                                @change="toggleAll()"
+                                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600
+                                       focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                            />
+                        </x-table.th>
+                        <x-table.th sortable sorted="asc">Nama</x-table.th>
+                        <x-table.th sortable>Email</x-table.th>
+                        <x-table.th>Role</x-table.th>
+                        <x-table.th>Status</x-table.th>
+                        <x-table.th sortable>Bergabung</x-table.th>
+                        <x-table.th class="text-right">Aksi</x-table.th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
 
-        <x-slot name="footer">
-            <x-table.pagination :current="1" :last="10" :from="1" :to="10" :total="97" />
-        </x-slot>
-    </x-table.wrapper>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    @foreach ($users as $index => $user)
+                        <tr
+                            class="table-row-in group transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-800/40"
+                            style="animation-delay: {{ $index * 40 }}ms"
+                        >
+                            <td class="whitespace-nowrap px-5 py-3.5">
+                                <input
+                                    type="checkbox"
+                                    value="{{ $user['id'] }}"
+                                    x-model="selectedRows"
+                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600
+                                           focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                                />
+                            </td>
+
+                            <td class="whitespace-nowrap px-5 py-3.5">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white transition-transform duration-150 group-hover:scale-105 {{ $avatarPalette[$index % count($avatarPalette)] }}">
+                                        {{ $getInitials($user['name']) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $user['name'] }}</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500">ID #{{ str_pad($user['id'], 4, '0', STR_PAD_LEFT) }}</p>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="whitespace-nowrap px-5 py-3.5 text-sm text-gray-600 dark:text-gray-400">
+                                {{ $user['email'] }}
+                            </td>
+
+                            <td class="whitespace-nowrap px-5 py-3.5">
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $roleStyles[$user['role']] }}">
+                                    {{ $user['role'] }}
+                                </span>
+                            </td>
+
+                            <td class="whitespace-nowrap px-5 py-3.5">
+                                @php $status = $statusStyles[$user['status']]; @endphp
+                                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ $status['bg'] }} {{ $status['text'] }}">
+                                    <span class="relative flex h-1.5 w-1.5">
+                                        @if ($user['status'] === 'active')
+                                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full {{ $status['dot'] }} opacity-60"></span>
+                                        @endif
+                                        <span class="relative inline-flex h-1.5 w-1.5 rounded-full {{ $status['dot'] }}"></span>
+                                    </span>
+                                    {{ $status['label'] }}
+                                </span>
+                            </td>
+
+                            <td class="whitespace-nowrap px-5 py-3.5 text-sm text-gray-500 dark:text-gray-400">
+                                {{ $user['joined'] }}
+                            </td>
+
+                            <td class="whitespace-nowrap px-5 py-3.5 text-right">
+                                <x-table.row-actions row-id="{{ $user['id'] }}" />
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <x-slot name="footer">
+                <x-table.pagination :current="1" :last="10" :from="1" :to="10" :total="97" />
+            </x-slot>
+        </x-table.wrapper>
+
+        {{-- Bulk Actions Floating Bar --}}
+        <div
+            x-show="hasSelection"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-4"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-4"
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40
+                   flex items-center gap-4 px-5 py-3 rounded-xl shadow-2xl
+                   bg-gray-900 dark:bg-gray-800 border border-gray-700 dark:border-gray-600 pointer-events-auto"
+            style="display: none;"
+        >
+            {{-- Jumlah Terpilih --}}
+            <span class="text-sm font-medium text-white">
+                <span x-text="selectedRows.length" class="font-bold text-indigo-400"></span>
+                baris dipilih
+            </span>
+
+            <div class="w-px h-5 bg-gray-600 dark:bg-gray-500"></div>
+
+            {{-- Tombol Hapus Terpilih --}}
+            <button type="button"
+                class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium
+                       bg-red-600 hover:bg-red-700 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Hapus Terpilih
+            </button>
+
+            {{-- Tombol Batal --}}
+            <button type="button"
+                @click="clearSelection()"
+                class="text-sm font-medium text-gray-400 hover:text-white transition-colors focus:outline-none"
+            >
+                Batal
+            </button>
+        </div>
+    </div>
 
 </div>
 
