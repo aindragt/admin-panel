@@ -86,5 +86,53 @@
             
         </div>
     </section>
+
+    {{-- ================= SECTION 2: TOAST DEMOS ================= --}}
+    <section x-data="{ 
+        toasts: [],
+        addToast(type, message) {
+            const id = Date.now();
+            this.toasts.push({ id, type, message });
+        },
+        removeToast(id) {
+            this.toasts = this.toasts.filter(t => t.id !== id);
+        }
+    }" class="space-y-6">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">2. Toast Notification (Umpan Balik Melayang & Bertumpuk)</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Gunakan toast untuk mengirimkan umpan balik instan bertumpuk tanpa merusak layout atau memindahkan halaman.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-4 p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <x-form.button variant="success" @click="addToast('success', 'Data profil pengguna berhasil diperbarui!')">
+                ✅ Success Toast
+            </x-form.button>
+            <x-form.button variant="danger" @click="addToast('error', 'Terjadi kesalahan sistem, silakan coba lagi.')">
+                ❌ Error Toast
+            </x-form.button>
+            <x-form.button variant="warning" @click="addToast('warning', 'Peringatan: Kuota penyimpanan Anda hampir habis (90%).')">
+                ⚠️ Warning Toast
+            </x-form.button>
+            <x-form.button variant="primary" @click="addToast('info', 'Informasi: Sesi Anda akan berakhir dalam 10 menit.')">
+                ℹ️ Info Toast
+            </x-form.button>
+        </div>
+
+        {{-- Toast Floating Stack Container --}}
+        <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+            <template x-for="toast in toasts" :key="toast.id">
+                <div class="pointer-events-auto">
+                    <x-ui.toast 
+                        ::type="toast.type" 
+                        ::message="toast.message" 
+                        ::duration="4000"
+                        @click.outside="removeToast(toast.id)"
+                    />
+                </div>
+            </template>
+        </div>
+    </section>
 </div>
 @endsection
