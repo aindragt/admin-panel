@@ -125,9 +125,9 @@
             <template x-for="toast in toasts" :key="toast.id">
                 <div class="pointer-events-auto">
                     <x-ui.toast 
-                        ::type="toast.type" 
-                        ::message="toast.message" 
-                        ::duration="4000"
+                        type="toast.type" 
+                        message="toast.message" 
+                        :duration="4000"
                         @click.outside="removeToast(toast.id)"
                     />
                 </div>

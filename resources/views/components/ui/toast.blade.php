@@ -45,11 +45,18 @@
     }"
     x-init="
         if ($el.parentElement && $el.parentElement.__x_for_key) {
-            {{-- Jika dirender di dalam loop x-for (seperti tumpukan toast) --}}
-            const toastData = Alpine.raw($data.toast);
-            if (toastData) {
-                type = toastData.type;
-                message = toastData.message;
+            {{-- Jika berada di dalam template x-for --}}
+            if (typeof toast !== 'undefined') {
+                type = toast.type;
+                message = toast.message;
+            }
+        } else {
+            {{-- Jika parameter berupa expression string dari parent --}}
+            if (typeof {{ $type }} !== 'undefined') {
+                type = {{ $type }};
+            }
+            if (typeof {{ $message }} !== 'undefined') {
+                message = {{ $message }};
             }
         }
         setTimeout(() => { visible = false; }, {{ $duration }});
