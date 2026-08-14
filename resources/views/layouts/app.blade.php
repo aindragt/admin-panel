@@ -8,17 +8,14 @@
         document.documentElement.classList.remove('dark');
     }
 </script>
-<html
-    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-    x-data="{
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{
         darkMode: document.documentElement.classList.contains('dark'),
         sidebarOpen: window.innerWidth >= 1024
-    }"
-    x-init="$watch('darkMode', val => {
+    }" x-init="$watch('darkMode', val => {
         localStorage.setItem('color-theme', val ? 'dark' : 'light');
         val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark');
-    })"
->
+    })">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,8 +25,9 @@
     {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&display=swap" rel="stylesheet">
-
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&display=swap"
+        rel="stylesheet">
     {{-- Tailwind di-serve oleh Vite (lihat tailwind.config.js) --}}
     {{-- CDN dihapus: menyebabkan konflik darkMode config --}}
 
@@ -39,6 +37,7 @@
     {{-- Per-page styles --}}
     @stack('styles')
 </head>
+
 <body class="bg-gray-50 dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 antialiased">
 
     <div class="flex h-screen overflow-hidden">
@@ -66,4 +65,5 @@
     {{-- Per-page scripts --}}
     @stack('scripts')
 </body>
+
 </html>
