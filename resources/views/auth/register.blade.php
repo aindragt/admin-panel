@@ -1,5 +1,5 @@
 <x-layouts.guest>
-    <x-slot:title>Login — {{ config('app.name', 'Admin Panel') }}</x-slot:title>
+    <x-slot:title>Daftar Akun Baru — {{ config('app.name', 'Admin Panel') }}</x-slot:title>
 
     <div class="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-950 relative overflow-hidden">
         {{-- Background blobs for modern glassmorphism aesthetic --}}
@@ -14,14 +14,24 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11V7a2 2 0 00-2-2H6a2 2 0 00-2 2v2.5M14 20.354A10.97 10.97 0 0017 13V9a2 2 0 012-2h.5m-3.5 13V11M4 4h16.5"></path>
                     </svg>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Selamat Datang Kembali</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Silakan masuk ke akun admin Anda</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Pendaftaran Admin Baru</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Buat akun untuk mulai mengelola panel</p>
             </div>
 
             {{-- Form Card --}}
             <div class="bg-white dark:bg-gray-900/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none p-8">
-                <form action="{{ route('login') }}" method="POST" class="space-y-5">
+                <form action="{{ route('register.store') }}" method="POST" class="space-y-5">
                     @csrf
+
+                    <x-form.input
+                        name="name"
+                        type="text"
+                        label="Nama Lengkap"
+                        placeholder="Nama Lengkap Anda"
+                        value=""
+                        :required="true"
+                        :error="$errors->first('name')"
+                    />
 
                     <x-form.input
                         name="email"
@@ -33,26 +43,24 @@
                         :error="$errors->first('email')"
                     />
 
-                    <div class="space-y-1">
-                        <div class="flex items-center justify-between">
-                            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                            <a href="{{ route('password.request') }}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors">
-                                Lupa Password?
-                            </a>
-                        </div>
-                        <x-form.input
-                            name="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value=""
-                            :required="true"
-                            :error="$errors->first('password')"
-                        />
-                    </div>
+                    <x-form.input
+                        name="password"
+                        type="password"
+                        label="Password"
+                        placeholder="••••••••"
+                        value=""
+                        :required="true"
+                        :error="$errors->first('password')"
+                    />
 
-                    <x-form.checkbox
-                        name="remember"
-                        label="Ingat saya di perangkat ini"
+                    <x-form.input
+                        name="password_confirmation"
+                        type="password"
+                        label="Konfirmasi Password"
+                        placeholder="••••••••"
+                        value=""
+                        :required="true"
+                        :error="$errors->first('password_confirmation')"
                     />
 
                     <x-form.button
@@ -60,15 +68,15 @@
                         variant="primary"
                         class="w-full justify-center py-3 shadow-lg shadow-indigo-500/20"
                     >
-                        Masuk
+                        Mendaftar
                     </x-form.button>
                 </form>
 
-                {{-- Link to Register Page --}}
+                {{-- Link to Login Page --}}
                 <div class="mt-6 text-center text-sm border-t border-gray-100 dark:border-gray-800/60 pt-5">
-                    <span class="text-gray-500 dark:text-gray-400">Belum memiliki akun?</span>
-                    <a href="{{ route('register') }}" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors ml-1">
-                        Daftar Baru
+                    <span class="text-gray-500 dark:text-gray-400">Sudah memiliki akun?</span>
+                    <a href="{{ route('login') }}" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors ml-1">
+                        Masuk di Sini
                     </a>
                 </div>
             </div>

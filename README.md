@@ -1,58 +1,99 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Project Web Admin Panel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Halo semuanya! Selamat datang di repositori utama untuk pengembangan project ini. 
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🎯 Tentang Project Ini
+Project ini adalah sebuah **Sistem Informasi / Admin Panel** berbasis web. Sistem ini nantinya akan digunakan untuk mengelola data secara dinamis. Salah satu fitur utama yang sedang kita bangun saat ini adalah sistem **Manajemen Hak Akses (Role & Permission)** yang cukup kompleks, di mana kita bisa mengatur siapa saja yang boleh melihat, menambah, mengedit, atau menghapus data di dalam sistem.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Tech Stack (Teknologi yang Digunakan)
+Agar sistem berjalan cepat, interaktif, dan mudah di-maintenance, kita menggunakan kombinasi teknologi berikut (sering disebut sebagai TALL stack tanpa Livewire):
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+*   **Backend:** **Laravel (PHP)** - Menangani urusan routing, database, keamanan, dan logika server.
+*   **Frontend / Tampilan:** **Blade Templates** - Bawaan dari Laravel untuk membuat struktur HTML.
+*   **Styling:** **Tailwind CSS** - Framework CSS *utility-first* untuk membuat desain yang modern. (Kita juga mengimplementasikan fitur *Dark Mode*!).
+*   **Interaktivitas UI:** **Alpine.js** - Framework JavaScript yang sangat ringan untuk menangani *dropdown*, *modal*, *checkbox* interaktif (seperti fitur *Select All*), tanpa perlu menulis JavaScript yang panjang atau menggunakan jQuery.
+*   **Role & Permission:** **Spatie Laravel Permission** - *Package* tambahan untuk mempermudah pengaturan otorisasi user.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🚦 Panduan Instalasi (Getting Started)
+Untuk bisa mulai *ngoding* dan mencoba menjalankan project ini di komputer (localhost) kalian, ikuti langkah-langkah berurutan di bawah ini:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Kebutuhan Sistem (Prerequisites)
+Pastikan di komputer kalian sudah ter-install:
+*   [PHP](https://www.php.net/) (Minimal versi 8.1+)
+*   [Composer](https://getcomposer.org/) (Untuk manajemen *package* PHP)
+*   [Node.js & NPM](https://nodejs.org/) (Untuk meng-compile Tailwind & asset *frontend*)
+*   Database Server (MySQL / MariaDB via XAMPP, Laragon, dsb.)
+*   Git
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 2. Langkah Setup Project
+Jalankan perintah berikut di terminal (Command Prompt / VS Code Terminal):
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone repositori ini ke komputer kalian
+git clone <masukkan_url_repository_di_sini>
 
-php artisan boost:install
+# 2. Masuk ke dalam folder project
+cd <nama_folder_project>
+
+# 3. Install semua library PHP yang dibutuhkan Laravel
+composer install
+
+# 4. Install semua library Frontend (Tailwind, dll)
+npm install
+
+# 5. Buat file konfigurasi environment
+cp .env.example .env
+
+# 6. Generate *App Key* untuk keamanan Laravel
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 3. Setup Database
+1. Buka aplikasi database kalian (misal: phpMyAdmin) dan buat database kosong (misal: beri nama `admin_panel_db`).
+2. Buka file `.env` di VS Code, lalu ubah bagian ini sesuai nama database yang baru saja dibuat:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=admin_panel_db
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+3. Jalankan migrasi dan *seeder* (agar database kalian langsung terisi data *dummy* seperti role Super Admin, dsb):
+   ```bash
+   php artisan migrate --seed
+   ```
 
-## Contributing
+### 4. Menjalankan Project
+Untuk menjalankan aplikasi, kalian butuh **dua terminal yang berjalan bersamaan**:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Terminal 1 (Menjalankan server PHP):**
+```bash
+php artisan serve
+```
 
-## Code of Conduct
+**Terminal 2 (Meng-compile CSS/JS secara realtime setiap kali file disimpan):**
+```bash
+npm run dev
+```
+Setelah keduanya berjalan, buka browser dan akses: `http://localhost:8000`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🤝 Alur Kerja (Workflow) Kolaborasi
+1. **Jangan pernah *commit* atau *push* langsung ke *branch* `main`.**
+2. Selalu buat *branch* baru dari `main` jika ingin mengerjakan fitur/issue baru.
+   *(Contoh: `git checkout -b feature/nama-fitur`)*
+3. Jika sudah selesai, lakukan *push* *branch* kalian dan buat **Pull Request (PR)** di GitHub untuk di-review bersama.
+4. Cek daftar tugas dan prioritas di menu **Issues** pada repository GitHub kita.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📞 Butuh Bantuan?
+Bingung saat proses instalasi? Ada pesan *error* aneh yang muncul di terminal? Atau kurang paham dengan cara kerja Alpine.js dan Tailwind? 
+Sama, akupun bingung 😝
+Pande pande ajalah y, selamat ngoding! ☕💻
