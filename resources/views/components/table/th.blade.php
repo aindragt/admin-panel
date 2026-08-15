@@ -1,6 +1,6 @@
 @props([
     'sortable' => false,
-    'sorted' => null, {{-- 'asc' | 'desc' | null --}}
+    'sorted' => null, // 'asc' or 'desc' or null
 ])
 
 @php

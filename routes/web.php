@@ -7,6 +7,7 @@ Route::get('/forms', fn() => view('pages.forms'))->name('forms.demo');
 Route::get('/ui-components', fn() => view('pages.ui-components'))->name('ui.demo');
 Route::get('/tables', fn() => view('pages.tables'))->name('tables.demo');
 Route::get('/login', fn() => view('auth.login'))->name('login');
+Route::get('/profile/settings', fn () => view('profile.settings'))->name('profile.settings');
 Route::post('/login', fn() => redirect()->route('dashboard'));
 
 Route::get('/register', fn() => view('auth.register'))->name('register');
